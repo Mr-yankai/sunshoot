@@ -22,7 +22,7 @@ const { ccclass, property } = cc._decorator;
 export default class homeUI_ctrl extends BaseView {
 
     public weapon: string = null;
-    public skill: string = SkillList.wind;
+    public skill: string = SkillList.fist;
     public weaponClick: string = null;
     public playAdReward: PlayAdReward = null;
     private shareStartTime: number = 0;

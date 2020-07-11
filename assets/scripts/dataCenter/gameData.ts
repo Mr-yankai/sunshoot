@@ -1,9 +1,10 @@
 
 import UserData from "../dataCenter/userData"
 import {WeaponAttribute} from "../config/WeaponAttribute"
+import {SkillAttribute} from "../config/SkillAttribute"
 import {LevelConfig} from "../config/LevelConfig";
 import {request} from "../game/request";
-import {General, EventList ,GameProgress} from "../config/Global";
+import {General, EventList ,GameProgress, WeaponList} from "../config/Global";
 import EventManager from "../managers/eventManager";
 import {timestampToTime, translateNumber} from "../utills/common";
 import Advert from "../wx/advert";
@@ -104,6 +105,16 @@ export default class GameData  {
         return weaponAttr;
     }
 
+    /**获取技能属性 */
+    public getSkillAttr(skill: string): any {
+        return SkillAttribute[skill];
+    }
+
+    /**获取技能伤害倍率 */
+    // public getSkillDamage(skill: string): number {
+    //     return this.getSkillAttr(skill).damageRate;
+    // }
+
     /**
      * 获取玩家当前金币值
      */
@@ -146,15 +157,6 @@ export default class GameData  {
             return false;
         }
     }
-
-    // public setFocoBeginTime(): void {
-    //     this.focoBeginTime = new Date().getTime();
-    // }
-
-    // public setFocoEndTime(): void {
-    //     this.focoEndTime = new Date().getTime();
-    //     const timeOffset = this.focoEndTime - this.focoBeginTime;
-    // }
 
     //满级试用开始
     public fullUseBegin(): void {
@@ -247,19 +249,6 @@ export default class GameData  {
     }
 
     /**
-     * 更新玩家剩余血量
-     */
-    // public updatePlayerBlood(): void {
-    //     if(this.gameProcess == GameProgress.end){
-    //         return;
-    //     }
-    //     this.playerLife --;
-    //     this.sendMassage(EventList.updateLife, this.playerLife);
-
-    //     this.checkEnd();        
-    // }
-
-    /**
      * 更新丢失太阳的数量
      */
     public updateLoseCnt(): void {
@@ -297,8 +286,10 @@ export default class GameData  {
             const share = this.assertShareSupport();
             if(this.resurgenceTimes == 0 && (video || share)){ //可复活-广告或分享支持且有复活次数
                 const type = video ? "video" : "share";
-                this.sendMassage(EventList.resurgence, type);
-                this.gameProcess = GameProgress.resurgence;
+                if(this.gameProcess != GameProgress.resurgence){//等待复活时可能技能还在继续消灭
+                    this.sendMassage(EventList.resurgence, type);
+                    this.gameProcess = GameProgress.resurgence;
+                }                
             }
             else{             
                 this.gamefail(); //本局结束
@@ -365,6 +356,7 @@ export default class GameData  {
         this.gameProcess = GameProgress.start;
         this.playerLife += General.resurgenceLife;
         this.sendMassage(EventList.updateLife, this.playerLife);
+        this.checkEnd(); //复活期间可能太阳被技能消灭完了，复活成功后校验一次游戏是否结束
     }
 
     /**

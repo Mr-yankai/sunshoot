@@ -1,9 +1,10 @@
 
 import UIManager from "../managers/UIManager";
 import GameData from "../dataCenter/gameData";
-import {WeaponList, General, GameProgress} from "../config/Global"
+import {WeaponList, General, GameProgress, EventList, SkillList} from "../config/Global"
 import SoundManager from "../managers/soundManager";
 import {translateNumber} from '../utills/common';
+import EventManager from "../managers/eventManager";
 
 const {ccclass, property} = cc._decorator;
 
@@ -17,7 +18,7 @@ export default class Sun extends cc.Component {
     private fullBlood: number = 0;
     private blood: number = 0;
     private scaleRatio: number = 1;
-    private collisionPositon: cc.Vec2;
+    //private collisionPositon: cc.Vec2;
 
     onLoad () {      
         this.node.x = ((Math.random() - 0.5) * cc.winSize.width) * 0.8;
@@ -35,6 +36,8 @@ export default class Sun extends cc.Component {
         this.updateBlood(); 
         this.getRandomSpeed(); 
         this.lightRotateAction();
+
+        EventManager.instance.add_event_listener(EventList.castSkill, this, this.onSkill);
     }
 
     /**
@@ -140,7 +143,7 @@ export default class Sun extends cc.Component {
     }
 
     /**
-     * 被箭射中/技能击中 回调
+     * 碰撞检测：被箭射中/技能击中 回调
      * @param other 其它碰撞组件
      * @param self 自身碰撞组件
      */
@@ -160,6 +163,7 @@ export default class Sun extends cc.Component {
      * 击中对象：风
      */
     private onWindCollision(other, self): void {
+        this.oncCollisionDeformation(false, true);
         this.moveStop();
         const wpos = this.node.convertToWorldSpaceAR(cc.v2(0, 0));
         const pos = other.node.convertToNodeSpaceAR(wpos);
@@ -179,8 +183,8 @@ export default class Sun extends cc.Component {
      * 击中对象：箭
      */
     private onArrowCollision(other, self): void {
-        this.oncCollisionDeformation();
-        this.collisionPositon = self.world.position;
+        this.oncCollisionDeformation(true, true);
+        //this.collisionPositon = self.world.position;
         const weapon = GameData.instance.getCurrentWeapon();
         switch (weapon) {
             case WeaponList.GeneralArrow:
@@ -210,29 +214,31 @@ export default class Sun extends cc.Component {
     /**
      * 被箭击中动画效果
      */
-    private oncCollisionDeformation(): void {
-        cc.tween(this.node)
-            .to(0.1, {scaleX: 1.05 * this.scaleRatio, scaleY: 0.95 * this.scaleRatio}, {easing: "backOut"})
-            .to(0.1, {scaleX: 0.95 * this.scaleRatio, scaleY: 1.05 * this.scaleRatio}, {easing: "backOut"})
-            .to(0.1, {scaleX: this.scaleRatio, scaleY: this.scaleRatio}, {easing: "backOut"})
-            .start();
-
-        const peng = this.node.getChildByName("peng");
-        peng.active = true;
-        const pengIndex = Math.random() > 0.5 ? 1 : 2;
-        UIManager.instance.createTexture(peng, `texture/sun/peng${pengIndex}`); 
-        peng.opacity = 0;
-        peng.scale = 0;
-        peng.stopAllActions();
-        cc.tween(peng)
-            .to(0.1, {scale: 1, opacity: 255})
-            .delay(0.1)
-            .to(0.1, {opacity: 0})
-            .call(()=>{
-                peng.active = false;
-            })
-            .start();
-        
+    private oncCollisionDeformation(isScale: boolean, isPeng: boolean): void {
+        if(isScale){
+            cc.tween(this.node)
+                .to(0.1, {scaleX: 1.05 * this.scaleRatio, scaleY: 0.95 * this.scaleRatio}, {easing: "backOut"})
+                .to(0.1, {scaleX: 0.95 * this.scaleRatio, scaleY: 1.05 * this.scaleRatio}, {easing: "backOut"})
+                .to(0.1, {scaleX: this.scaleRatio, scaleY: this.scaleRatio}, {easing: "backOut"})
+                .start();
+        }
+        if(isPeng){
+            const peng = this.node.getChildByName("peng");
+            peng.active = true;
+            const pengIndex = Math.random() > 0.5 ? 1 : 2;
+            UIManager.instance.createTexture(peng, `texture/sun/peng${pengIndex}`); 
+            peng.opacity = 0;
+            peng.scale = 0;
+            peng.stopAllActions();
+            cc.tween(peng)
+                .to(0.1, {scale: 1, opacity: 255})
+                .delay(0.1)
+                .to(0.1, {opacity: 0})
+                .call(()=>{
+                    peng.active = false;
+                })
+                .start();
+        }        
     }
 
     /**
@@ -292,7 +298,6 @@ export default class Sun extends cc.Component {
         const weaponAttr = GameData.instance.getCurrentWeaponAttr();
         let damage = weaponAttr.damage;
         const pierceDamage = weaponAttr.pierceDamage / 100;
-        //console.log("pierceDamage:", pierceDamage)
         const hitSunCnt = othernode.getComponent("arrow").getHitCnt();
         for(let i = 0; i < hitSunCnt; i++){
             damage *= pierceDamage;
@@ -301,6 +306,30 @@ export default class Sun extends cc.Component {
         this.blood -= damage;
         this.updateBlood();
         //Tip(sefnode, "-" + translateNumber(damage), cc.Color.WHITE, 0, 24);
+    }
+
+    /**
+     * 被技能击中回调
+     */
+    private onSkill(event, data): void {
+        switch (data) {
+            case SkillList.fist:
+                this.oncCollisionDeformation(true, true);
+                setTimeout(()=>{
+                    if(this.node){
+                        const rate = GameData.instance.getSkillAttr(SkillList.fist).damageRate;
+                        this.blood -= this.fullBlood * rate;
+                        if(this.blood <= 0){
+                            this.explode();
+                            this.node.destroy();
+                        }
+                    }                   
+                }, 500)                
+                break;
+        
+            default:
+                break;
+        }
     }
 
     update (dt) {
@@ -332,6 +361,10 @@ export default class Sun extends cc.Component {
     }
 
     onDestroy() {
+
+        //取消全局事件监听
+        EventManager.instance.remove_event_listenner(EventList.castSkill, this, this.onSkill);
+
         if(this.blood <= 0){
             GameData.instance.updateHitCnt();
             

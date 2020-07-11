@@ -16,12 +16,11 @@ export const General = {
     slowSpeed: 0.1,                 //复活等待时太阳移动速度减缓程度
     SunTurnInterval: 2,             //太阳移动转变方向时间间隔
     TripleArrowInterval: 12,        //三箭齐发三根箭的夹角
-    maxFocoTime: 5,                 //蓄力满所需时间
+    //maxFocoTime: 3,                 //蓄力满所需时间
 
     resurgenceTime: 5,              //复活倒计时时间
     resurgenceLife: 3,              //复活增加生命值
     
-    //severHost: "https://cp-testali.iboxpay.com/server/sunshoot",
     severHost: "https://godyan.cn/server/sunshoot",
     
 }
@@ -45,6 +44,7 @@ export const WeaponList = {
  */
 export enum SkillList {
     wind = "wind",
+    fist = "fist",
 }
 
 /**
@@ -70,6 +70,7 @@ export enum EventList  {
     gameOver = "gameOver",
     resurgence = "resurgence",
     playAdSuccess = "playAdSuccess",
+    castSkill = "castSkill",
 
 }
 

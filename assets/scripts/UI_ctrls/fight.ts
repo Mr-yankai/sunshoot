@@ -352,7 +352,9 @@ export default class Fight extends BaseView {
             case SkillList.wind:
                 this.playWindSkill();
                 break;
-        
+            case SkillList.fist:
+                this.playFistSkill();
+                break;
             default:
                 break;
         }
@@ -364,6 +366,9 @@ export default class Fight extends BaseView {
     /**技能初始化 */
     public skillInit(): void {
         this.view("skillRoot/skill").active = false;
+        this.view("skillRoot/skill").children.forEach(element=>{
+            element.active = false;
+        })
         this.focoRate = 0;
         this.updateFocoRate();
     }
@@ -382,21 +387,53 @@ export default class Fight extends BaseView {
         const particle = wind.getComponent(cc.ParticleSystem);
         particle.resetSystem();
         cc.tween(wind)
-            .to(2, {scale: 1, opacity: 255, x: Math.random() * 200 - 100, y: 100})
-            .to(3, {x: Math.random() * 400 - 200, y: 300})
-            .to(3, {x: Math.random() * 400 - 200, y: 600})
-            .to(3, {x: Math.random() * 400 - 200, y: 900})
-            .to(2, {scale: 0, opacity: 0, x: Math.random() * 200 - 100, y: 1000})
+            .to(1, {scale: 1, opacity: 255, x: Math.random() * 200 - 100, y: 100})
+            .to(2, {x: Math.random() * 400 - 200, y: 300})
+            .to(2, {x: Math.random() * 400 - 200, y: 600})
+            .to(2, {x: Math.random() * 400 - 200, y: 900})
+            .to(1.5, {scale: 0, opacity: 0, x: Math.random() * 200 - 100, y: 380 + cc.winSize.height * 0.5})
             .call(()=>{
+                wind.children.forEach(element=>{
+                    element.destroy();
+                })
                 wind.setPosition(cc.v2(0, 0));
                 wind.active = false;
             })
             .start();
     }
 
+    /**
+     * 施放技能：fist
+     */
+    private playFistSkill(): void {
+        const fist = this.view("skillRoot/skill/fist");
+        fist.active = true;
+        const fistUpDown = fist.getChildByName("fistUpDown");
+        UIManager.instance.createTexture(fistUpDown, "texture/common/fistUp");
+        fistUpDown.scale = 0;
+        fistUpDown.opacity = 255;
+        cc.tween(fistUpDown)
+            .to(0.5, {scale: 3}, {easing: "backOut"})
+            .call(()=>{
+                UIManager.instance.createTexture(fistUpDown, "texture/common/fistDown");
+                const wave = fist.getChildByName("wave");
+                const particle = wave.getComponent(cc.ParticleSystem);
+                particle.resetSystem();
+            })
+            .to(0.5, {scale: 0.8}, {easing: "backIn"})
+            .call(()=>{
+                EventManager.instance.dispatch_event(EventList.castSkill, SkillList.fist);
+            })
+            .to(1, {opacity: 0})
+            .start();
+        
+    }
+
     update(dt): void {
         if(!this.isFocoing) return;
-        this.focoRate += dt / General.maxFocoTime;
+        const attr = GameData.instance.getSkillAttr(this.homeUI_ctrl.skill);
+        const coolTime = attr["coolDownTime"];
+        this.focoRate += dt / coolTime;
         if(this.focoRate > 1){
             this.focoRate = 1;
         }

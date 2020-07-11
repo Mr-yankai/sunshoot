@@ -112,12 +112,12 @@ export default class UIManager {
         item.color = color;
         cc.tween(item)
             .by(0.25, 
-                {opacity: 255 ,position: cc.v2(0, 40)}, 
+                {opacity: 255 ,position: cc.v2(0, 80)}, 
                 {easing: "backOut"}
                 )
             .delay(duration)
             .by(0.25, 
-                {opacity: -255 ,position: cc.v2(0, 40)}, 
+                {opacity: -255 ,position: cc.v2(0, 80)}, 
                 {easing: "backIn"})
             .call(()=>{
                 item.destroy();

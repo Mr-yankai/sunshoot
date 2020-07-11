@@ -104,6 +104,8 @@ export const ResList = {
             "texture/freeReceive/videobtn",
 
             "texture/common/life64",
+            "texture/common/fistUp",
+            "texture/common/fistDown",
 
         ],
         
@@ -130,6 +132,8 @@ export const ResList = {
             "particle/juqi",
             "particle/upgrade",
             "particle/coin",
+            // "particle/maulerWava",
+            
             
         ],
 
