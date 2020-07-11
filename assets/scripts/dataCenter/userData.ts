@@ -1,7 +1,8 @@
-import {WeaponList} from "../config/Global";
+import {WeaponList, SkillList} from "../config/Global";
 import {request} from "../game/request"
 import {genId} from "../utills/common"
 import GameData from "./gameData";
+import { SkillAttribute } from "../config/SkillAttribute";
 
 
 export default class UserData {
@@ -13,6 +14,7 @@ export default class UserData {
         maxLevel: 0,
         coin: 0,
         lastWeapon: WeaponList.GeneralArrow,
+        lastSkill: SkillList.fist,
         weapon: {
             generalArrow: {
                 whetherHave: true,
@@ -38,6 +40,10 @@ export default class UserData {
                 whetherHave: false,
                 level: 1
             },
+        },
+        skill: {
+            fist: true,
+            wind: true,
         }
     }
 
@@ -61,12 +67,24 @@ export default class UserData {
     private initUserData(): void {
         let uData = cc.sys.localStorage.getItem("uData");
         if(uData && uData !== ""){
-            this.uData = JSON.parse(uData);
+            uData = JSON.parse(uData);
+            if(uData["lastSkill"] == undefined){
+                uData["lastSkill"] = SkillList.fist;
+            }
+            if(uData["skill"] == undefined){
+                uData["skill"] = {};
+            }
+            for(let key in SkillList){
+                if(uData["skill"][SkillList[key]] == undefined){
+                    uData["skill"][SkillList[key]] = false;
+                }                    
+            }
+            this.uData = uData;
         }
         else{
-            this.uData.userId = genId();
-            this.uDataLocalStorage();           
+            this.uData.userId = genId();                     
         }
+        this.uDataLocalStorage(); 
     }
 
     
@@ -105,6 +123,11 @@ export default class UserData {
 
     public updateLastWeapon(weapon: string): void {
         this.uData.lastWeapon = weapon;
+        this.uDataLocalStorage();
+    }
+
+    public updateLastSkill(skill: string): void {
+        this.uData.lastSkill = skill;
         this.uDataLocalStorage();
     }
 

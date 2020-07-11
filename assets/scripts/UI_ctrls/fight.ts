@@ -344,11 +344,12 @@ export default class Fight extends BaseView {
     /**技能施放按钮点击事件 */
     private onSwitchClick(event, data): void {
         if(this.focoRate < 1){
-            UIManager.instance.toastTip(this.node, "蓄力未满", cc.Color.WHITE, 1);
+            UIManager.instance.toastTip(this.node, "满蓄力状态才能施放技能", cc.Color.WHITE, 0.5);
             return;
         }
         this.view("skillRoot/skill").active = true;
-        switch (this.homeUI_ctrl.skill) {
+        const skill = GameData.instance.getCurrentSkill();
+        switch (skill) {
             case SkillList.wind:
                 this.playWindSkill();
                 break;
@@ -409,13 +410,13 @@ export default class Fight extends BaseView {
         const fist = this.view("skillRoot/skill/fist");
         fist.active = true;
         const fistUpDown = fist.getChildByName("fistUpDown");
-        UIManager.instance.createTexture(fistUpDown, "texture/common/fistUp");
+        UIManager.instance.createTexture(fistUpDown, "texture/skill/fistUp");
         fistUpDown.scale = 0;
         fistUpDown.opacity = 255;
         cc.tween(fistUpDown)
             .to(0.5, {scale: 3}, {easing: "backOut"})
             .call(()=>{
-                UIManager.instance.createTexture(fistUpDown, "texture/common/fistDown");
+                UIManager.instance.createTexture(fistUpDown, "texture/skill/fistDown");
                 const wave = fist.getChildByName("wave");
                 const particle = wave.getComponent(cc.ParticleSystem);
                 particle.resetSystem();
@@ -431,7 +432,8 @@ export default class Fight extends BaseView {
 
     update(dt): void {
         if(!this.isFocoing) return;
-        const attr = GameData.instance.getSkillAttr(this.homeUI_ctrl.skill);
+        const skill = GameData.instance.getCurrentSkill();
+        const attr = GameData.instance.getSkillAttr(skill);
         const coolTime = attr["coolDownTime"];
         this.focoRate += dt / coolTime;
         if(this.focoRate > 1){

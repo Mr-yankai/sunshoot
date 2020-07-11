@@ -42,9 +42,9 @@ export const WeaponList = {
 /**
  * 技能列表
  */
-export enum SkillList {
-    wind = "wind",
-    fist = "fist",
+export const SkillList = {   
+    fist : "fist",
+    wind : "wind",
 }
 
 /**

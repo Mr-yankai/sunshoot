@@ -5,7 +5,7 @@ import ResLoad from '../managers/resLoad';
 import GameData from '../dataCenter/gameData';
 import Advert from "../wx/advert";
 import {translateNumber, timestampToTime} from '../utills/common';
-import {EventList, WeaponList, ShootStatus, PlayAdReward} from '../config/Global';
+import {EventList, WeaponList, ShootStatus, PlayAdReward, SkillList} from '../config/Global';
 import EventManager from '../managers/eventManager';
 import homeUI_ctrl from "./homeUI_ctrl";
 
@@ -36,6 +36,7 @@ export default class BottomBtn extends BaseView {
         this.setButtonStatus(this.view("bottom/weapon"), true);
         this.setButtonStatus(this.view("bottom/forge"), false);
         this.setButtonStatus(this.view("bottom/skill"), false);
+        this.hideSkillList();
         this.showWeaponList();
     }
 
@@ -45,11 +46,12 @@ export default class BottomBtn extends BaseView {
         // this.setButtonStatus(this.view("bottom/forge"), true);
         this.setButtonStatus(this.view("bottom/skill"), false);
         this.hideWeaponList();
+        this.hideSkillList();
         UIManager.instance.toastTip(
             this.node, 
             "[武器锻造]敬请期待",
             cc.Color.WHITE,
-            1
+            0.5
             )
     }
 
@@ -57,14 +59,9 @@ export default class BottomBtn extends BaseView {
         SoundManager.instance.playEffect("audioClip/click_x");
         this.setButtonStatus(this.view("bottom/weapon"), false);
         this.setButtonStatus(this.view("bottom/forge"), false);
-        // this.setButtonStatus(this.view("bottom/skill"), true);
+        this.setButtonStatus(this.view("bottom/skill"), true);
         this.hideWeaponList();
-        UIManager.instance.toastTip(
-            this.node, 
-            "[全屏技能]敬请期待",
-            cc.Color.WHITE,
-            1
-            )
+        this.showSkillList();
     }
 
     /**
@@ -210,6 +207,8 @@ export default class BottomBtn extends BaseView {
     private onWeaponIconClick(event, data): void {
         SoundManager.instance.playEffect("audioClip/click_s");
         if(!data.whetherHave){  //武器未解锁，不做任何处理
+            const unlockLevel = GameData.instance.getWeaponUnlockLevel(data.weapon);
+            UIManager.instance.toastTip(this.node, `通过${unlockLevel}关后解锁`, cc.Color.WHITE, 0.5);
             return;
         }
         this.homeUI_ctrl.weaponClick = data.weapon;
@@ -233,10 +232,9 @@ export default class BottomBtn extends BaseView {
     }
 
     /**
-     * 切换主武器
+     * 武器icon点击成功事件
      */
     public onWeaponIconClickCallback(): void {
-        //UIManager.instance.playParticle(this.view("weapon"), "particle/click");
         this.homeUI_ctrl.weapon = this.homeUI_ctrl.weaponClick;
         GameData.instance.updateLastWeapon(this.homeUI_ctrl.weapon);   //主武器切换
         this.homeUI_ctrl.fight.updateWeaponStatus(this.homeUI_ctrl.weapon, ShootStatus.Ready)
@@ -252,7 +250,7 @@ export default class BottomBtn extends BaseView {
         const isOk = GameData.instance.weaponUpgrade(weapon);
         if(!isOk){
             SoundManager.instance.playEffect("audioClip/click_s");
-            UIManager.instance.toastTip(this.node, "金币不足", cc.Color.WHITE, 1);
+            UIManager.instance.toastTip(this.node, "金币不足", cc.Color.WHITE, 0.5);
             return;
         }
 
@@ -277,5 +275,79 @@ export default class BottomBtn extends BaseView {
         else{
             data.weaponIcon.getChildByName("upgrade").active = false;
         }
+    }
+
+
+    /**
+     * 展示技能选择列表
+     */
+    private showSkillList(): void {
+        let skillList = this.view("skillList");
+        skillList.active = true;
+        this.createSkillList();
+    }
+
+    /**
+     * 隐藏技能选择列表
+     */
+    public hideSkillList(): void {
+        if(!this.view("skillList").active) return;
+        SoundManager.instance.playEffect("audioClip/click_s");
+        let skillList = this.view("skillList");
+        skillList.active = false;
+    }
+
+    /**
+     * 创建技能列表
+     */
+    private createSkillList(): void {
+        this.view("skillList/view/content").removeAllChildren();
+        const iconPrefab = ResLoad.instance.getRes("ui_prefabs/skillIcon");
+        for(let key in SkillList){
+            let item = cc.instantiate(iconPrefab);
+            this.view("skillList/view/content").addChild(item);
+            item.name = SkillList[key];
+            this.createSkillIcon(item);            
+        }
+    }
+
+    /**绘制技能图标 */
+    private createSkillIcon(skillIcon: cc.Node){       
+        const skill = skillIcon.name;
+        const uData = GameData.instance.getUserData(); 
+
+        const iconUrl = `texture/skill/${skill}`;
+        UIManager.instance.createTexture(skillIcon.getChildByName("skill"), iconUrl)
+        
+        const whetherHave = uData.skill[`${skill}`];
+        skillIcon.getChildByName("lock").active = !whetherHave;
+
+        this.onButtonEvent(skillIcon, "onSkillIconClick", {
+            whetherHave: whetherHave,
+            skill: skill,
+        })
+
+    }
+
+    /**
+     * 技能icon点击事件
+     */
+    private onSkillIconClick(event, data): void {
+        SoundManager.instance.playEffect("audioClip/click_s");
+        if(!data.whetherHave){  //武器未解锁，不做任何处理
+            UIManager.instance.toastTip(this.node, `完成指定任务或成就后解锁`, cc.Color.WHITE, 0.5);
+            return;
+        }
+        this.homeUI_ctrl.skill = data.skill;
+        GameData.instance.updateLastSkill(data.skill);
+
+        const icons = this.view("skillList/view/content").children;
+        //icon点击状态切换
+        icons.forEach(element => {
+            const isClick = element.name == this.homeUI_ctrl.skill;
+            const bgUrl = isClick ? "texture/skill/select" : "texture/skill/unSelect";
+            UIManager.instance.createTexture(element.getChildByName("bg"), bgUrl);
+        })
+           
     }
 }

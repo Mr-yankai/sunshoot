@@ -88,8 +88,19 @@ export default class GameData  {
         return uData.lastWeapon;
     }
 
+    public getCurrentSkill(): string {
+        const uData = this.getUserData();
+        return uData.lastSkill;
+    }
+
     public getTotalCount(): number {
         return this.sunTotalCnt;
+    }
+
+    /**武器解锁关卡 */
+    public getWeaponUnlockLevel(weapon: string): number {
+        const attr = this.weaponAttr[weapon];
+        return attr.unlockLevel;
     }
 
     /**
@@ -491,6 +502,10 @@ export default class GameData  {
 
     public updateLastWeapon(weapon: string): void {
         UserData.instance.updateLastWeapon(weapon);
+    }
+
+    public updateLastSkill(skill: string): void {
+        UserData.instance.updateLastSkill(skill);
     }
 
     public unLockWeapon(weapon: string): void {

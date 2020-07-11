@@ -22,8 +22,9 @@ const { ccclass, property } = cc._decorator;
 export default class homeUI_ctrl extends BaseView {
 
     public weapon: string = null;
-    public skill: string = SkillList.fist;
+    public skill: string = null;
     public weaponClick: string = null;
+    //public skillClick: string = null;
     public playAdReward: PlayAdReward = null;
     private shareStartTime: number = 0;
     public togetherGas: cc.ParticleSystem = null;
@@ -239,8 +240,9 @@ export default class homeUI_ctrl extends BaseView {
         const hideTime = new Date().getTime();
         const timeOffset = hideTime - this.openTime;
         if(timeOffset < 1200) return;
-        if(this.view("weaponList").active){
+        if(this.view("weaponList").active || this.view("skillList").active){
             this.bottomBtn.hideWeaponList();
+            this.bottomBtn.hideSkillList();
             this.bottomBtn.setButtonStatus(this.view("bottom/weapon"), false);
             this.bottomBtn.setButtonStatus(this.view("bottom/forge"), false);
             this.bottomBtn.setButtonStatus(this.view("bottom/skill"), false);
@@ -257,7 +259,7 @@ export default class homeUI_ctrl extends BaseView {
                     this.node,
                     "体力不足",
                     cc.Color.WHITE,
-                    1
+                    0.5
                 )
             }
         }
@@ -587,6 +589,10 @@ export default class homeUI_ctrl extends BaseView {
         label_2.string = (currentLevel + 1).toString();
         label_3.string = (currentLevel + 2).toString();
 
+        if(currentLevel == 1){
+            label_0.string = "";
+        }
+
     }
 
     /**
@@ -738,10 +744,10 @@ export default class homeUI_ctrl extends BaseView {
         const time = new Date().getTime();
         const timeOffset = time - this.shareStartTime;
         if(timeOffset < 2000){
-            UIManager.instance.toastTip(this.node, "分享失败", cc.Color.WHITE, 1);
+            UIManager.instance.toastTip(this.node, "分享失败", cc.Color.WHITE, 0.5);
         }
         else{
-            UIManager.instance.toastTip(this.node, "分享成功", cc.Color.WHITE, 1);
+            UIManager.instance.toastTip(this.node, "分享成功", cc.Color.WHITE, 0.5);
             EventManager.instance.dispatch_event(EventList.playAdSuccess, "");
 
             const nowTime = timestampToTime(new Date().getTime());

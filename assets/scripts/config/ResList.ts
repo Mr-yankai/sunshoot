@@ -5,7 +5,8 @@ export const ResList = {
         prefabs: [
             "ui_prefabs/homeUI" ,
             "ui_prefabs/weaponIcon",
-            "ui_prefabs/sun"
+            "ui_prefabs/sun",
+            "ui_prefabs/skillIcon"
         ],
      
         sprite_frames:[
@@ -104,8 +105,11 @@ export const ResList = {
             "texture/freeReceive/videobtn",
 
             "texture/common/life64",
-            "texture/common/fistUp",
-            "texture/common/fistDown",
+
+            "texture/skill/fistUp",
+            "texture/skill/fistDown",
+            "texture/skill/fist",
+            "texture/skill/wind",
 
         ],
         

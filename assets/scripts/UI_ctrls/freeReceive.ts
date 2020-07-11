@@ -41,7 +41,7 @@ export default class FreeReceive extends BaseView {
         if(!isShareOk && !isVideoOk){ //分享/视频均不可用
             UIManager.instance.toastTip(this.node, 
                 "今日免费领取次数已用完", 
-                cc.Color.WHITE, 1);
+                cc.Color.WHITE, 0.3);
             return
         }
         const freeReceive = this.view("freeReceive");
