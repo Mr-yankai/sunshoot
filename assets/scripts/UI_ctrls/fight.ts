@@ -484,7 +484,7 @@ export default class Fight extends BaseView {
 
     private createArrowBlizzard(arrow: cc.Node, startPos: cc.Vec2, endPos: cc.Vec2): void {
         const dir = endPos.sub(startPos);
-        const angel = Math.atan(dir.y / dir.x) * 180 / Math.PI - 90;
+        const angel = Math.atan2(dir.y, dir.x) * 180 / Math.PI - 90;
         arrow.angle = angel;
         arrow.setPosition(startPos);
 
