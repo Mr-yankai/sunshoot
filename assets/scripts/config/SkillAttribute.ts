@@ -13,4 +13,9 @@ export const SkillAttribute = {
         damageRate: 0.5,
     },
 
+    arrowBlizzard: {
+        coolDownTime: 3,
+       // damageRate: 0.5,
+    },
+
 }

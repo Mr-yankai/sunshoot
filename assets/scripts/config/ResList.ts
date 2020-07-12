@@ -110,6 +110,7 @@ export const ResList = {
             "texture/skill/fistDown",
             "texture/skill/fist",
             "texture/skill/wind",
+            "texture/skill/arrowBlizzard",
 
         ],
         

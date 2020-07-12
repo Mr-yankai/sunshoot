@@ -45,6 +45,7 @@ export const WeaponList = {
 export const SkillList = {   
     fist : "fist",
     wind : "wind",
+    arrowBlizzard : "arrowBlizzard",
 }
 
 /**

@@ -136,7 +136,7 @@ export default class Fight extends BaseView {
         UIManager.instance.createTexture(arrow, url);  
         //UIManager.instance.createMotionStreak(arrow, url);
         let ctrl = arrow.addComponent("arrow");
-        ctrl.shoot(angle, url); 
+        ctrl.shoot(angle); 
     }
 
     /**
@@ -344,7 +344,7 @@ export default class Fight extends BaseView {
     /**技能施放按钮点击事件 */
     private onSwitchClick(event, data): void {
         if(this.focoRate < 1){
-            UIManager.instance.toastTip(this.node, "满蓄力状态才能施放技能", cc.Color.WHITE, 0.5);
+            UIManager.instance.toastTip(this.node, "请蓄力", cc.Color.WHITE, 0.5);
             return;
         }
         this.view("skillRoot/skill").active = true;
@@ -355,6 +355,9 @@ export default class Fight extends BaseView {
                 break;
             case SkillList.fist:
                 this.playFistSkill();
+                break;
+            case SkillList.arrowBlizzard:
+                this.playArrowBlizzardSkill();
                 break;
             default:
                 break;
@@ -426,8 +429,76 @@ export default class Fight extends BaseView {
                 EventManager.instance.dispatch_event(EventList.castSkill, SkillList.fist);
             })
             .to(1, {opacity: 0})
+            .start();      
+    }
+
+    /**
+     * 施放技能：arrowBlizzard
+     */
+    private playArrowBlizzardSkill(): void {
+        const arrowBlizzard = this.view("skillRoot/skill/arrowBlizzard");
+        arrowBlizzard.active = true;
+        const handler = setInterval(()=>{
+            SoundManager.instance.playEffect("audioClip/shoot");
+            const arrow = new cc.Node();
+            const weapon = GameData.instance.getCurrentWeapon();
+            const arrowUrl = `texture/weapon/${weapon}_arrow`;
+            UIManager.instance.createTexture(arrow, arrowUrl);
+            UIManager.instance.setShaderEffect(arrow, "Glowing");
+            arrowBlizzard.addChild(arrow);
+            const randomNum = Math.random();
+            let startPosX, endPosX, startPosY, endPosY;
+            if(randomNum < 0.25){ //上
+                startPosX = Math.random() * cc.winSize.width - cc.winSize.width * 0.5;
+                endPosX = Math.random() * cc.winSize.width - cc.winSize.width * 0.5;
+                startPosY = cc.winSize.height - 380;
+                endPosY = 0;
+                
+            }
+            else if(randomNum < 0.5){ //下
+                startPosX = Math.random() * cc.winSize.width - cc.winSize.width * 0.5;
+                endPosX = Math.random() * cc.winSize.width - cc.winSize.width * 0.5;
+                startPosY = 0;
+                endPosY = cc.winSize.height - 380;
+
+            }
+            else if(randomNum < 0.75){ //左
+                startPosX = - cc.winSize.width * 0.5;
+                endPosX = cc.winSize.width * 0.5;
+                startPosY = Math.random() * (cc.winSize.height - 380);
+                endPosY = Math.random() * (cc.winSize.height - 380);
+            }
+            else { //右
+                startPosX = cc.winSize.width * 0.5;
+                endPosX = - cc.winSize.width * 0.5;
+                startPosY = Math.random() * (cc.winSize.height - 380);
+                endPosY = Math.random() * (cc.winSize.height - 380);
+            }
+            this.createArrowBlizzard(arrow, cc.v2(startPosX, startPosY), cc.v2(endPosX, endPosY));
+        }, 100)
+
+        setTimeout(()=>{
+            clearInterval(handler);
+        }, 3000)
+    }
+
+    private createArrowBlizzard(arrow: cc.Node, startPos: cc.Vec2, endPos: cc.Vec2): void {
+        const dir = endPos.sub(startPos);
+        const angel = Math.atan(dir.y / dir.x) * 180 / Math.PI - 90;
+        arrow.angle = angel;
+        arrow.setPosition(startPos);
+
+        arrow.group = "ARROWS";
+        const bcl = arrow.addComponent(cc.BoxCollider);
+        bcl.offset = cc.v2(0, arrow.height * 0.5 - 25);
+        bcl.size = new cc.Size(50, 50);
+
+        cc.tween(arrow)
+            .to(0.2, { position: endPos})
+            .call(()=>{
+                arrow.destroy();
+            })
             .start();
-        
     }
 
     update(dt): void {

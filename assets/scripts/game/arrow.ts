@@ -20,18 +20,10 @@ export default class Arrow extends cc.Component {
     }
 
 
-    public shoot(degree: number, url: string): void {
+    public shoot(degree: number): void {
         this.node.angle = degree;
         this.direction = (degree + 90) * Math.PI / 180;
         this.isMove = true;
-
-        //拖尾
-        // const child = new cc.Node();
-        // child.parent = this.node;
-        // const streak = child.addComponent(cc.MotionStreak);
-        // UIManager.instance.createMotionStreak(child, url);
-        // streak.fadeTime = 0.1;
-        // streak.stroke = 32;
     }
 
     private shootStop(): void {

@@ -148,11 +148,13 @@ export default class Sun extends cc.Component {
      * @param self 自身碰撞组件
      */
     private onCollisionEnter(other, self): void {
-        switch (other.node.name) {
-            case "wind":
+        switch (other.node.group) {
+            case "WIND":
                 this.onWindCollision(other, self);
                 break;
-            
+            case "ARROWS":
+                this.onArrowBlizzardCollision(other, self);
+                break;
             default:
                 this.onArrowCollision(other, self);
                 break;
@@ -180,6 +182,18 @@ export default class Sun extends cc.Component {
     }
 
     /**
+     * 击中对象：乱箭
+     */
+    private onArrowBlizzardCollision(other, self): void {
+        this.oncCollisionDeformation(true, true);
+        this.onUnbuff();
+        if (this.blood <= 0) {
+            this.explode();
+            this.node.destroy();
+        }
+    }
+
+    /**
      * 击中对象：箭
      */
     private onArrowCollision(other, self): void {
@@ -190,7 +204,7 @@ export default class Sun extends cc.Component {
             case WeaponList.GeneralArrow:
             case WeaponList.TripleArrow:
             case WeaponList.ContinuousArrow:
-                this.onUnbuff(self.node);
+                this.onUnbuff();
                 break;
             case WeaponList.CritArrow:   //暴击
                 this.onHitCritArrow(self.node);
@@ -244,7 +258,7 @@ export default class Sun extends cc.Component {
     /**
      * 普通箭、三箭连发、三箭齐发
      */
-    private onUnbuff(node: cc.Node): void {
+    private onUnbuff(): void {
         const weaponAttr = GameData.instance.getCurrentWeaponAttr();
         this.blood -= weaponAttr.damage;
         this.updateBlood();

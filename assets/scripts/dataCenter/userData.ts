@@ -44,6 +44,7 @@ export default class UserData {
         skill: {
             fist: true,
             wind: true,
+            arrowBlizzard: true,
         }
     }
 
@@ -66,7 +67,7 @@ export default class UserData {
 
     private initUserData(): void {
         let uData = cc.sys.localStorage.getItem("uData");
-        if(uData && uData !== ""){
+        if(uData && uData !== ""){ //有存档
             uData = JSON.parse(uData);
             if(uData["lastSkill"] == undefined){
                 uData["lastSkill"] = SkillList.fist;
@@ -81,7 +82,7 @@ export default class UserData {
             }
             this.uData = uData;
         }
-        else{
+        else{ //无存档
             this.uData.userId = genId();                     
         }
         this.uDataLocalStorage(); 
