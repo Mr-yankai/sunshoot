@@ -2,7 +2,7 @@
 import {Wechat} from "../config/Global";
 import GameData from "../dataCenter/gameData";
 import EventManager from "../managers/eventManager";
-import {EventList} from "../config/Global";
+import {EventList} from "../config/Enumeration";
 import {timestampToTime} from "../utills/common";
 
 

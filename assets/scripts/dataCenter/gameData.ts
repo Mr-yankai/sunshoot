@@ -4,7 +4,8 @@ import {WeaponAttribute} from "../config/WeaponAttribute"
 import {SkillAttribute} from "../config/SkillAttribute"
 import {LevelConfig} from "../config/LevelConfig";
 import {request} from "../game/request";
-import {General, EventList ,GameProgress, WeaponList} from "../config/Global";
+import {General} from "../config/Global";
+import {EventList ,GameProgress, WeaponList} from "../config/Enumeration";
 import EventManager from "../managers/eventManager";
 import {timestampToTime, translateNumber} from "../utills/common";
 import Advert from "../wx/advert";

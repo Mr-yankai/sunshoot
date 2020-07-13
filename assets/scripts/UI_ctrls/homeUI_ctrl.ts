@@ -3,7 +3,8 @@ import GameData from '../dataCenter/gameData';
 import UIManager from '../managers/UIManager';
 import EventManager from '../managers/eventManager';
 import SoundManager from "../managers/soundManager"
-import {EventList, EnergyConfig, ShootStatus, PlayAdReward, SkillList} from '../config/Global'
+import {EventList, ShootStatus, PlayAdReward} from '../config/Enumeration' ;
+import {EnergyConfig} from '../config/Global'
 import ResLoad from '../managers/resLoad';
 import {translateNumber, timestampToTime} from '../utills/common';
 import {openDomain} from "../wx/openDomain"
@@ -239,7 +240,7 @@ export default class homeUI_ctrl extends BaseView {
     private onBlankClick(): void {
         const hideTime = new Date().getTime();
         const timeOffset = hideTime - this.openTime;
-        if(timeOffset < 1200) return;
+        if(timeOffset < 1000) return;
         if(this.view("weaponList").active || this.view("skillList").active){
             this.bottomBtn.hideWeaponList();
             this.bottomBtn.hideSkillList();
@@ -294,6 +295,7 @@ export default class homeUI_ctrl extends BaseView {
         this.showLeft();
         this.showLevel();
         this.bottomBtn.hideWeaponList();
+        this.bottomBtn.hideSkillList();
         this.hideLine(); 
         this.hidelife();
         this.hideSkill();
@@ -371,12 +373,9 @@ export default class homeUI_ctrl extends BaseView {
 
     /**显示技能施放节点 */
     private showSkill(): void {
-        this.view("skillRoot").active = true;
+        //this.view("skillRoot").active = true;
         this.fight.skillInit();
-        const btn = this.view("skillRoot/switch");
-        btn.scale = 0;
-        btn.opacity = 0;
-        cc.tween(btn).to(0.3, {scale: 1, opacity: 255}).start();
+        
     }
 
     /**隐藏技能施放节点 */

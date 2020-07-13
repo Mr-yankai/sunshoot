@@ -1,6 +1,6 @@
 const {ccclass, property} = cc._decorator;
 import {General} from "../config/Global";
-import {WeaponList} from "../config/Global";
+import {WeaponList} from "../config/Enumeration";
 //import {WeaponAttribute} from "../config/WeaponAttribute"
 import GameData from "../dataCenter/gameData";
 import UIManager from "../managers/UIManager";

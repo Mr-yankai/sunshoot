@@ -1,20 +1,24 @@
-import {WeaponList, SkillList} from "../config/Global";
-import {request} from "../game/request"
-import {genId} from "../utills/common"
-import GameData from "./gameData";
-import { SkillAttribute } from "../config/SkillAttribute";
+import {WeaponList, SkillList, TaskList} from "../config/Enumeration";
+import {genId, timestampToTime} from "../utills/common";
 
 
 export default class UserData {
 
     private uData = {
         userId: "",
-        videoTime: {},
-        shareTime: {},
+        videoTime: {}, //观看视频广告时间记录
+        shareTime: {}, //分享时间记录
+        lastLoginTime: "", //上次登录时间
         maxLevel: 0,
+        maxCombo: 0,
+        maxContinueLogin: 1,
+        maxLogin: 1,
+        maxHitCount: 0,
+        shareSuccessCount: 0,
+        watchVideoCount: 0,
         coin: 0,
-        lastWeapon: WeaponList.GeneralArrow,
-        lastSkill: SkillList.fist,
+        lastWeapon: WeaponList.GeneralArrow, //最后选择的武器
+        lastSkill: SkillList.fist, //最后选择的技能
         weapon: {
             generalArrow: {
                 whetherHave: true,
@@ -45,6 +49,11 @@ export default class UserData {
             fist: true,
             wind: true,
             arrowBlizzard: true,
+        },
+        task: {
+            task1: false, //是否已领取奖励
+            task2: false,
+            task3: false,
         }
     }
 
@@ -65,6 +74,7 @@ export default class UserData {
         console.log(src);
     }
 
+    /**初始化玩家数据 */
     private initUserData(): void {
         let uData = cc.sys.localStorage.getItem("uData");
         if(uData && uData !== ""){ //有存档
@@ -72,14 +82,49 @@ export default class UserData {
             if(uData["lastSkill"] == undefined){
                 uData["lastSkill"] = SkillList.fist;
             }
+
             if(uData["skill"] == undefined){
                 uData["skill"] = {};
             }
-            for(let key in SkillList){
-                if(uData["skill"][SkillList[key]] == undefined){
-                    uData["skill"][SkillList[key]] = false;
+            for(let skillKey in SkillList){
+                if(uData["skill"][SkillList[skillKey]] == undefined){
+                    uData["skill"][SkillList[skillKey]] = false;
                 }                    
             }
+
+            if(uData["task"] == undefined){
+                uData["task"] = {};
+            }
+            for(let taskKey in TaskList){
+                if(uData["task"][SkillList[taskKey]] == undefined){
+                    uData["task"][SkillList[taskKey]] = false;
+                }
+            }
+
+            if(uData["maxCombo"] == undefined) uData["maxCombo"] = 0;
+            if(uData["maxContinueLogin"] == undefined) uData["maxContinueLogin"] = 1;
+            if(uData["maxLogin"] == undefined) uData["maxLogin"] = 1;
+            if(uData["maxHitCount"] == undefined) uData["maxHitCount"] = 0;
+            if(uData["shareSuccessCount"] == undefined) uData["shareSuccessCount"] = 0;
+            if(uData["watchVideoCount"] == undefined) uData["watchVideoCount"] = 0;
+
+            const nowTime = new Date().getTime();
+            //首次登录
+            if(uData["lastLoginTime"] == undefined || uData["lastLoginTime"] == ""){
+                uData["lastLoginTime"] = timestampToTime(nowTime);
+            }
+            //非首次登录,且昨日有登录过
+            else if(parseInt(timestampToTime(nowTime).replace(/-/g, "")) 
+                    - parseInt(timestampToTime(uData["lastLoginTime"]).replace(/-/g, "")) == 1){
+                uData["maxContinueLogin"] += 1;
+                uData["maxLogin"] += 1;
+            }
+            //非首次登录,昨天未登录过
+            else{
+                uData["maxContinueLogin"] = 1; //连续登录天数重置为1
+                uData["maxLogin"] += 1;        //总登录天数依然累加
+            }
+
             this.uData = uData;
         }
         else{ //无存档

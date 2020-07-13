@@ -5,7 +5,7 @@ import ResLoad from '../managers/resLoad';
 import GameData from '../dataCenter/gameData';
 import Advert from "../wx/advert";
 import {translateNumber, timestampToTime} from '../utills/common';
-import {EventList, WeaponList, ShootStatus, PlayAdReward, SkillList} from '../config/Global';
+import {EventList, WeaponList, ShootStatus, PlayAdReward, SkillList} from '../config/Enumeration';
 import EventManager from '../managers/eventManager';
 import homeUI_ctrl from "./homeUI_ctrl";
 

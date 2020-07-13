@@ -5,17 +5,18 @@
 export const SkillAttribute = {
 
     wind: {
-        coolDownTime: 5
+        coolDownTime: 5,
+        damageRate: 1,
     },
 
     fist: {
         coolDownTime: 3,
-        damageRate: 0.5,
+        damageRate: 0.4,
     },
 
     arrowBlizzard: {
         coolDownTime: 3,
-       // damageRate: 0.5,
+        damageRate: 0.2,
     },
 
 }

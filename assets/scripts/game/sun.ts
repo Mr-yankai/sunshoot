@@ -1,7 +1,8 @@
 
 import UIManager from "../managers/UIManager";
 import GameData from "../dataCenter/gameData";
-import {WeaponList, General, GameProgress, EventList, SkillList} from "../config/Global"
+import {WeaponList, GameProgress, EventList, SkillList} from "../config/Enumeration" 
+import {General} from "../config/Global"
 import SoundManager from "../managers/soundManager";
 import {translateNumber} from '../utills/common';
 import EventManager from "../managers/eventManager";
@@ -175,7 +176,7 @@ export default class Sun extends cc.Component {
             .to(1, { position: cc.v2(0, 0), scale: 0 })
             .call(() => {
                 this.blood = 0;
-                this.node.removeFromParent();
+                //this.node.removeFromParent();
                 this.node.destroy();
             })
             .start();
@@ -186,8 +187,10 @@ export default class Sun extends cc.Component {
      */
     private onArrowBlizzardCollision(other, self): void {
         this.oncCollisionDeformation(true, true);
-        this.onUnbuff();
-        if (this.blood <= 0) {
+        const damageRate = GameData.instance.getSkillAttr(SkillList.arrowBlizzard).damageRate;
+        this.blood -= damageRate * this.fullBlood;
+        this.updateBlood();
+        if (this.blood <= 0) { 
             this.explode();
             this.node.destroy();
         }
@@ -319,7 +322,7 @@ export default class Sun extends cc.Component {
         damage = Math.floor(damage);
         this.blood -= damage;
         this.updateBlood();
-        //Tip(sefnode, "-" + translateNumber(damage), cc.Color.WHITE, 0, 24);
+        //toastTip(sefnode, "-" + translateNumber(damage), cc.Color.WHITE, 0, 24);
     }
 
     /**

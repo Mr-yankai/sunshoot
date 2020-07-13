@@ -3,7 +3,8 @@ import GameData from '../dataCenter/gameData';
 import UIManager from '../managers/UIManager';
 import EventManager from '../managers/eventManager';
 import SoundManager from "../managers/soundManager"
-import {EventList, EnergyConfig, PlayAdReward} from '../config/Global'
+import {EventList, PlayAdReward} from '../config/Enumeration'
+import {EnergyConfig} from '../config/Global'
 import {translateNumber, timestampToTime} from '../utills/common';
 import Advert from "../wx/advert";
 import homeUI_ctrl from "./homeUI_ctrl";

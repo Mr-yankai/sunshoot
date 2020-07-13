@@ -3,7 +3,8 @@ import GameData from '../dataCenter/gameData';
 import UIManager from '../managers/UIManager';
 import EventManager from '../managers/eventManager';
 import SoundManager from "../managers/soundManager"
-import {General, EventList, WeaponList, ShootStatus, PlayAdReward, SkillList} from '../config/Global'
+import {EventList, WeaponList, ShootStatus, PlayAdReward, SkillList} from '../config/Enumeration'
+import {General} from '../config/Global'
 import {timestampToTime} from '../utills/common';
 import Advert from "../wx/advert";
 import homeUI_ctrl from "./homeUI_ctrl";
@@ -344,7 +345,7 @@ export default class Fight extends BaseView {
     /**技能施放按钮点击事件 */
     private onSwitchClick(event, data): void {
         if(this.focoRate < 1){
-            UIManager.instance.toastTip(this.node, "请蓄力", cc.Color.WHITE, 0.5);
+            UIManager.instance.toastTip(this.node, "蓄满能量才能释放哦~", cc.Color.WHITE, 0.5);
             return;
         }
         this.view("skillRoot/skill").active = true;
@@ -369,10 +370,19 @@ export default class Fight extends BaseView {
 
     /**技能初始化 */
     public skillInit(): void {
-        this.view("skillRoot/skill").active = false;
-        this.view("skillRoot/skill").children.forEach(element=>{
-            element.active = false;
-        })
+        this.view("skillRoot").active = true;
+        this.view("skillRoot/skill").active = true;
+        const btn = this.view("skillRoot/switch");
+        const skill = GameData.instance.getCurrentSkill();
+        UIManager.instance.createTexture(
+            btn.getChildByName("icon"), 
+            `texture/skill/${skill}`
+        );
+        btn.scale = 0;
+        btn.opacity = 0;
+        cc.tween(btn)
+            .to(0.3, {scale: 1, opacity: 255})
+            .start();
         this.focoRate = 0;
         this.updateFocoRate();
     }
