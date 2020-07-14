@@ -6,6 +6,7 @@ import {LevelConfig} from "../config/LevelConfig";
 import {request} from "../game/request";
 import {General} from "../config/Global";
 import {EventList ,GameProgress, WeaponList} from "../config/Enumeration";
+import {TaskCfg, TaskRewardStatus} from "../config/Task"
 import EventManager from "../managers/eventManager";
 import {timestampToTime, translateNumber} from "../utills/common";
 import Advert from "../wx/advert";
@@ -98,6 +99,31 @@ export default class GameData  {
         return this.sunTotalCnt;
     }
 
+    /**
+     * 任务信息
+     */
+    public getTaskCfg(): any {
+        let cfg = TaskCfg;
+        const uData = this.getUserData();
+        for(let key in cfg){
+            const taskType = cfg[key].condition.type;
+            const taskValue = cfg[key].condition.value;
+            let userCnt = uData[taskType];
+            let userStatus = {userCnt: 0, rewardStatus: null}
+            if(userCnt >= taskValue){
+                userStatus.userCnt = taskValue;
+                userStatus.rewardStatus = uData.task[key] ? TaskRewardStatus.received : TaskRewardStatus.unreceived;
+            }
+            else{
+                userStatus.userCnt = userCnt;
+                userStatus.rewardStatus = TaskRewardStatus.unfinished;
+            }
+            cfg[key]["userStatus"] = userStatus;
+        }
+        console.log(cfg)
+        return cfg;
+    }
+
     /**武器解锁关卡 */
     public getWeaponUnlockLevel(weapon: string): number {
         const attr = this.weaponAttr[weapon];
@@ -121,11 +147,6 @@ export default class GameData  {
     public getSkillAttr(skill: string): any {
         return SkillAttribute[skill];
     }
-
-    /**获取技能伤害倍率 */
-    // public getSkillDamage(skill: string): number {
-    //     return this.getSkillAttr(skill).damageRate;
-    // }
 
     /**
      * 获取玩家当前金币值

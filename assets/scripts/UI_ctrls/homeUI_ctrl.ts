@@ -245,7 +245,7 @@ export default class homeUI_ctrl extends BaseView {
             this.bottomBtn.hideWeaponList();
             this.bottomBtn.hideSkillList();
             this.bottomBtn.setButtonStatus(this.view("bottom/weapon"), false);
-            this.bottomBtn.setButtonStatus(this.view("bottom/forge"), false);
+            this.bottomBtn.setButtonStatus(this.view("bottom/task"), false);
             this.bottomBtn.setButtonStatus(this.view("bottom/skill"), false);
         }
         else{

@@ -59,12 +59,3 @@ export const SkillList = {
     wind : "wind",
     arrowBlizzard : "arrowBlizzard",
 }
-
-/**
- * 任务列表
- */
-export const TaskList = {   
-    task1 : "task1",
-    task2 : "task1",
-    task3 : "task1",
-}

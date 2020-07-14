@@ -6,7 +6,8 @@ export const ResList = {
             "ui_prefabs/homeUI" ,
             "ui_prefabs/weaponIcon",
             "ui_prefabs/sun",
-            "ui_prefabs/skillIcon"
+            "ui_prefabs/skillIcon",
+            "ui_prefabs/task",
         ],
      
         sprite_frames:[
@@ -106,12 +107,22 @@ export const ResList = {
 
             "texture/common/life64",
 
+            //技能
             "texture/skill/fistUp",
             "texture/skill/fistDown",
             "texture/skill/fist",
             "texture/skill/wind",
             "texture/skill/arrowBlizzard",
 
+            //任务
+            "texture/task/goBtn",
+            "texture/task/receiveBtn",
+            "texture/task/receivedBtn",
+            "texture/task/reward_arrowBlizzard",
+            "texture/task/reward_coin",
+            "texture/task/reward_energy",
+            "texture/task/reward_fist",
+            "texture/task/reward_wind",
         ],
         
         audio_clips: [

@@ -6,6 +6,7 @@ import GameData from '../dataCenter/gameData';
 import Advert from "../wx/advert";
 import {translateNumber, timestampToTime} from '../utills/common';
 import {EventList, WeaponList, ShootStatus, PlayAdReward, SkillList} from '../config/Enumeration';
+import {TaskReward, TaskRewardStatus} from "../config/Task"
 import EventManager from '../managers/eventManager';
 import homeUI_ctrl from "./homeUI_ctrl";
 
@@ -27,41 +28,44 @@ export default class BottomBtn extends BaseView {
     start () {
 
         this.onButtonEvent(this.view("bottom/weapon"), "onWeaponClick", "");
-        this.onButtonEvent(this.view("bottom/forge"),  "onForgeClick", "");
+        this.onButtonEvent(this.view("bottom/task"),  "onTaskClick", "");
+        this.onButtonEvent(this.view("task/mask"),  "onTaskMaskClick", "");
         this.onButtonEvent(this.view("bottom/skill"), "onSkillClick", "");
     }
 
     private onWeaponClick(): void {
         SoundManager.instance.playEffect("audioClip/click_x");
         this.setButtonStatus(this.view("bottom/weapon"), true);
-        this.setButtonStatus(this.view("bottom/forge"), false);
+        this.setButtonStatus(this.view("bottom/task"), false);
         this.setButtonStatus(this.view("bottom/skill"), false);
         this.hideSkillList();
+        this.hideTaskList();
         this.showWeaponList();
     }
 
-    private onForgeClick(): void {
+    private onTaskClick(): void {
         SoundManager.instance.playEffect("audioClip/click_x");
         this.setButtonStatus(this.view("bottom/weapon"), false);
-        // this.setButtonStatus(this.view("bottom/forge"), true);
+        this.setButtonStatus(this.view("bottom/task"), true);
         this.setButtonStatus(this.view("bottom/skill"), false);
         this.hideWeaponList();
         this.hideSkillList();
-        UIManager.instance.toastTip(
-            this.node, 
-            "[武器锻造]敬请期待",
-            cc.Color.WHITE,
-            0.5
-            )
+        this.showTaskList();
     }
 
     private onSkillClick(): void {
         SoundManager.instance.playEffect("audioClip/click_x");
         this.setButtonStatus(this.view("bottom/weapon"), false);
-        this.setButtonStatus(this.view("bottom/forge"), false);
+        this.setButtonStatus(this.view("bottom/task"), false);
         this.setButtonStatus(this.view("bottom/skill"), true);
         this.hideWeaponList();
+        this.hideTaskList();
         this.showSkillList();
+    }
+
+    private onTaskMaskClick(): void {
+        this.hideTaskList();
+        this.setButtonStatus(this.view("bottom/task"), false);
     }
 
     /**
@@ -72,6 +76,78 @@ export default class BottomBtn extends BaseView {
     public setButtonStatus(node: cc.Node ,isClick: boolean): void {
         const url = isClick ? "texture/button/onclick" : "texture/button/unclick";
         UIManager.instance.createTexture(node, url);
+    }
+
+    /**
+     * 展示任务列表
+     */
+    private showTaskList(): void {
+        let task = this.view("task");
+        task.active = true;
+        this.createTaskList();
+    }
+
+    /**
+     * 隐藏任务列表
+     */
+    private hideTaskList(): void {
+        SoundManager.instance.playEffect("audioClip/click_s");
+        let task = this.view("task");
+        task.active = false;
+    }
+
+    /**
+     * 创建任务列表
+     */
+    private createTaskList(): void {
+        const taskData = GameData.instance.getTaskCfg();
+        const taskPrefeb = ResLoad.instance.getRes("ui_prefabs/task", cc.Prefab);
+        const content = this.view("task/frame/view/content");
+        content.removeAllChildren();
+        for(let key in taskData){
+            let item = cc.instantiate(taskPrefeb);
+            content.addChild(item);
+            this.setTaskData(item, taskData[key]);
+        }
+    }
+
+    /**
+     * 设置单条任务节点展示
+     * @param node 
+     * @param data 
+     */
+    private setTaskData(node: cc.Node, data: any): void {
+        node.getChildByName("title").getComponent(cc.Label).string = data.title;
+        node.getChildByName("description").getComponent(cc.Label).string = data.description;
+        node.getChildByName("progress").getComponent(cc.Label).string = `${data.userStatus.userCnt} / ${data.condition.value}`;
+        let cntLabel = "";
+        let iconUrl = "";
+        if(data.reward.type == TaskReward.ReceiveSkill){
+            iconUrl = `texture/task/reward_${data.reward.value}`;
+            cntLabel = "X 1"
+        }
+        else if(data.reward.type == TaskReward.ReceiveCoin){
+            iconUrl = "texture/task/reward_coin";
+            cntLabel = `X ${data.reward.value}`
+        }
+        else if(data.reward.type == TaskReward.ReceiveEnergy){
+            iconUrl = "texture/task/reward_energy";
+            cntLabel = `X ${data.reward.value}`
+        }
+        node.getChildByName("rewardCnt").getComponent(cc.Label).string = cntLabel;
+        UIManager.instance.createTexture(node.getChildByName("rewardIcon"), iconUrl);
+
+        let btnUrl = "";
+        if(data.userStatus.rewardStatus == TaskRewardStatus.received){
+            btnUrl = "texture/task/receivedBtn";
+        }
+        else if(data.userStatus.rewardStatus == TaskRewardStatus.unreceived){
+            btnUrl = "texture/task/receiveBtn";
+        }
+        else{
+            btnUrl = "texture/task/goBtn";
+        }
+        UIManager.instance.createTexture(node.getChildByName("btn"), btnUrl);
     }
 
     /**
