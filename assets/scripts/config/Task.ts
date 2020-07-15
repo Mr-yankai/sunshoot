@@ -9,7 +9,8 @@ export const TaskType = {
     MaxLogin: "maxLogin",
     MaxHitCount: "maxHitCount",
     ShareSuccessCount: "shareSuccessCount",
-    WatchVideoCount: "watchVideoCount"
+    WatchVideoCount: "watchVideoCount",
+    TotalCoin: "totalCoin",
 }
 
 /**
@@ -21,6 +22,9 @@ export const TaskReward = {
     ReceiveSkill : "receiveSkill",
 }
 
+/**
+ * 玩家的任务奖励状态
+ */
 export enum TaskRewardStatus {
     unfinished,
     unreceived,
@@ -33,10 +37,10 @@ export enum TaskRewardStatus {
 export const TaskCfg = {
     1: {
         title: "登录达人",
-        description: "连续登录3天",
+        description: "连续登录1天",
         condition: {
             type: TaskType.MaxContinueLogin,
-            value: 3,
+            value: 1,
         },
         reward: {
             type: TaskReward.ReceiveSkill,
@@ -45,10 +49,10 @@ export const TaskCfg = {
     },
     2: {
         title: "登录狂魔",
-        description: "连续登录7天",
+        description: "连续登录2天",
         condition: {
             type: TaskType.MaxContinueLogin,
-            value: 7,
+            value: 2,
         },
         reward: {
             type: TaskReward.ReceiveCoin,
@@ -57,10 +61,10 @@ export const TaskCfg = {
     },
     3: {
         title: "登录狂魔",
-        description: "连续登录7天",
+        description: "连续登录3天",
         condition: {
             type: TaskType.MaxContinueLogin,
-            value: 7,
+            value: 3,
         },
         reward: {
             type: TaskReward.ReceiveEnergy,

@@ -36,15 +36,15 @@ export default class Arrow extends cc.Component {
      * @param self 自己节点
      */
     private onCollisionEnter(other, self): void {
-        const weapon = GameData.instance.getCurrentWeapon();
-        switch (weapon) {
-            case WeaponList.PierceArrow:
-                this.hitSunCnt ++;
-                break;
-            default:
-                this.node.destroy();
+        if(this.hitSunCnt == 0){
+            GameData.instance.updateCombo(true);
         }
-              
+        this.hitSunCnt ++;
+        
+        const weapon = GameData.instance.getCurrentWeapon();
+        if(weapon != WeaponList.PierceArrow){
+            this.node.destroy();
+        }              
     }
 
     public getHitCnt(): number {
@@ -59,6 +59,12 @@ export default class Arrow extends cc.Component {
         this.node.y += speedy * dt; 
         if(Math.abs(this.node.x) > 750 || Math.abs(this.node.y) > 1334){
             this.node.destroy();
+        }
+    }
+
+    onDestroy(): void {
+        if(this.hitSunCnt == 0){
+            GameData.instance.updateCombo(false);
         }
     }
 }

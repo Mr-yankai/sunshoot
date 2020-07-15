@@ -9,6 +9,7 @@ import {EventList ,GameProgress, WeaponList} from "../config/Enumeration";
 import {TaskCfg, TaskRewardStatus} from "../config/Task"
 import EventManager from "../managers/eventManager";
 import {timestampToTime, translateNumber} from "../utills/common";
+import Energy from "../dataCenter/energy"
 import Advert from "../wx/advert";
 import Login from "../wx/Login";
 
@@ -21,6 +22,8 @@ export default class GameData  {
     private playerLife = 0;                  //玩家所剩余生命值
     private reward = 0;                      //本局奖励
     private gameProcess = GameProgress.end;  //游戏当前状态
+    private maxCombo = 0;
+    private combo = 0;
     private weaponAttr = null
     private levelConfig = null;
     private unlockWeapon = null;             //挑战成功时解锁的武器
@@ -119,6 +122,7 @@ export default class GameData  {
                 userStatus.rewardStatus = TaskRewardStatus.unfinished;
             }
             cfg[key]["userStatus"] = userStatus;
+            cfg[key]["taskId"] = key;
         }
         console.log(cfg)
         return cfg;
@@ -212,6 +216,8 @@ export default class GameData  {
         this.hitedCnt = 0;
         this.loseCnt = 0;
         this.genSunCnt = 0;
+        this.maxCombo = 0;
+        this.combo = 0;
         this.gameProcess = GameProgress.start;
         this.unlockWeapon = null;
         this.fullUseWeapon = null;
@@ -304,7 +310,24 @@ export default class GameData  {
         if(persent < 0)  persent = 0;
 
         this.sendMassage(EventList.updateProgress, persent);
+    }
 
+    /**
+     * 处理combo事件
+     * @param isCombo 
+     */
+    public updateCombo(isCombo: boolean): void {
+        if (isCombo) {
+            this.combo++;
+            this.sendMassage(EventList.combo, this.combo); //派送事件
+            if (this.combo > this.maxCombo) {
+                this.maxCombo = this.combo;
+            }
+        }
+        else {
+            this.combo = 0;
+            this.sendMassage(EventList.combo, "miss"); //派送事件
+        }
     }
 
     /**
@@ -342,6 +365,8 @@ export default class GameData  {
         this.gameProcess = GameProgress.end;
         const level = this.getCurrentLevel();
         this.updateMaxLevel(level);
+        UserData.instance.updateMaxCombo(this.maxCombo);
+        UserData.instance.updateMaxHitCount(this.hitedCnt);
 
         //解锁武器
         for(let key in this.weaponAttr){
@@ -365,6 +390,9 @@ export default class GameData  {
             isVictory: false
             }
         )
+
+        UserData.instance.updateMaxCombo(this.maxCombo);
+        UserData.instance.updateMaxHitCount(this.hitedCnt)
 
         //记录生成的满级试用武器的名称
         const status = this.assertVideoSupport();
@@ -458,13 +486,19 @@ export default class GameData  {
         return this.playerLife;
     }
 
-    // /**
-    //  * 获取当前消灭进度
-    //  */
-    // public getCompletedProgress(): number{
-    //     const progress = (this.hitedCnt + this.loseCnt) / this.sunTotalCnt;
-    //     return progress;
-    // }
+    /**
+     * 领取金币
+     */
+    public receiveTaskCoin(coin: number): void {
+        UserData.instance.updateCoin(coin);
+    }
+
+    /**
+     * 领取体力
+     */
+    public receiveEnergy(energy: number): void {
+        Energy.instance.energyChange(energy);
+    }
 
     /**
      * 结算领取金币
@@ -472,9 +506,7 @@ export default class GameData  {
      */
     public receiveCoin(multiple: number): void {
         this.reward = this.reward * multiple;
-        const hisCoin = this.getUserData().coin;
-        const coin = hisCoin + this.reward;
-        this.updateCoin(coin);
+        UserData.instance.updateCoin(this.reward);
     }
 
     /**
@@ -482,9 +514,7 @@ export default class GameData  {
      */
     public freeReceiveCoin(): void {
         const cnt = this.getFreeReceiveCoin();  
-        const hisCoin = this.getUserData().coin;
-        const coin = hisCoin + cnt;
-        this.updateCoin(coin);
+        UserData.instance.updateCoin(cnt);
     }
 
 
@@ -518,10 +548,6 @@ export default class GameData  {
         }
     }
 
-    public updateCoin(coin: number): void {  
-        UserData.instance.updateCoin(coin);
-    }
-
     public updateLastWeapon(weapon: string): void {
         UserData.instance.updateLastWeapon(weapon);
     }
@@ -534,6 +560,10 @@ export default class GameData  {
         UserData.instance.unLockWeapon(weapon);
     }
 
+    public unLockSkill(skill: string): void {
+        UserData.instance.unLockSkill(skill);
+    }
+
     public weaponUpgrade(weapon: string): boolean {
         const userCoin = this.getCurrentCoin();
         const weaponLevel = this.getUserData().weapon[`${weapon}`].level;
@@ -543,9 +573,13 @@ export default class GameData  {
         }
         else{
             UserData.instance.weaponUpgrade(weapon);
-            this.updateCoin(userCoin - upCoin);
+            UserData.instance.updateCoin(- upCoin);
             return true;
         }        
+    }
+
+    public receiveTaskReward(taskId): void {
+        UserData.instance.receiveTaskReward(taskId);
     }
 
     //type: "share" or "video";  time: "2020-07-01"

@@ -18,6 +18,7 @@ export default class UserData {
         maxHitCount: 0,       //累计干掉太阳的数量
         shareSuccessCount: 0, //累计分享的次数
         watchVideoCount: 0,   //累计观看广告的次数
+        totalCoin: 0, //累计获取的金币数
         coin: 0,  //当前金币数
         lastWeapon: WeaponList.GeneralArrow, //最后选择的武器
         lastSkill: SkillList.fist, //最后选择的技能
@@ -96,6 +97,7 @@ export default class UserData {
                 }
             }
 
+            if(uData["totalCoin"] == undefined) uData["totalCoin"] = 0;
             if(uData["maxCombo"] == undefined) uData["maxCombo"] = 0;
             if(uData["continueLogin"] == undefined) uData["continueLogin"] = 1;
             if(uData["maxContinueLogin"] == undefined) uData["maxContinueLogin"] = 1;
@@ -178,14 +180,27 @@ export default class UserData {
     public updateMaxLevel(maxLevel: number): void {
         this.uData.maxLevel = maxLevel;
         this.uDataLocalStorage();
-
-        // request.updateUserMaxLevel(this.uData.userId, {
-        //     maxLevel: maxLevel
-        // })
     }
 
-    public updateCoin(coin: number): void {
-        this.uData.coin = coin;
+    /**
+     * 更新玩家金币数量
+     * @param offset 增量
+     */
+    public updateCoin(offset: number): void {
+        
+        this.uData.coin += offset;
+
+        if(offset > 0){
+            this.uData.totalCoin += offset;
+        }
+        
+        this.uDataLocalStorage();
+    }
+
+    public updateMaxCombo(combo: number): void {
+        const hisCombo = this.uData.maxCombo;
+        if (combo <= hisCombo) return;
+        this.uData.maxCombo = combo;
         this.uDataLocalStorage();
     }
 
@@ -204,6 +219,11 @@ export default class UserData {
         this.uDataLocalStorage();
     }
 
+    public unLockSkill(skillName: string): void {
+        this.uData.skill[skillName] = true;
+        this.uDataLocalStorage();
+    }
+
     public weaponUpgrade(weapon: string): void {
         console.log("b:",this.uData.weapon[weapon].level)
         this.uData.weapon[weapon].level ++;
@@ -211,6 +231,15 @@ export default class UserData {
         this.uDataLocalStorage();
     }
 
+    public updateMaxHitCount(offset: number): void {
+        this.uData.maxHitCount += offset;
+        this.uDataLocalStorage();
+    }
+
+    public receiveTaskReward(taskId): void {
+        this.uData.task[taskId] = true;
+        this.uDataLocalStorage();
+    }
 
     /**
      * 保存玩家看视频或者分享领取奖励的时间
@@ -224,6 +253,14 @@ export default class UserData {
             this.uData[key][time] = 0;
         }
         this.uData[key][time] += 1;
+
+        if(type == "video"){
+            this.uData.watchVideoCount += 1;
+        }
+        else if(type == "share"){
+            this.uData.shareSuccessCount += 1;
+        }
+
         this.uDataLocalStorage();
     }
 }

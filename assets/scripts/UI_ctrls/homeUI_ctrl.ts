@@ -102,6 +102,12 @@ export default class homeUI_ctrl extends BaseView {
             this,
             this.createSun
         )
+
+        EventManager.instance.add_event_listener(
+            EventList.combo,
+            this,
+            this.showCombo
+        )
     }
 
     /**
@@ -152,7 +158,7 @@ export default class homeUI_ctrl extends BaseView {
                     .delay(0.2)
                     .to(0.7, {scale: 0, position: this.view("top").position})
                     .call(()=>{
-                        Energy.instance.energyChange(EnergyConfig.freeReceive);
+                        GameData.instance.receiveEnergy(EnergyConfig.freeReceive);
                         this.freeReceive.hideFreeReceive("","");
                         child.destroy();
                     })
@@ -181,6 +187,29 @@ export default class homeUI_ctrl extends BaseView {
         this.view("suns").addChild(sun);
         let s = sun.addComponent("sun");
         s.move();
+    }
+
+    /**
+     * 监听event: 展示combo
+     */
+    private showCombo(event, data): void {
+        const combo = this.view("combo");
+        combo.active = true;
+        const textureUrl = data == "miss" ? "texture/common/miss" : "texture/common/combo";
+        UIManager.instance.createTexture(combo.getChildByName("texture"), textureUrl);
+        const str = combo.getChildByName("number").getComponent(cc.Label);
+        str.string = data == "miss" ? "" : "X" + data;
+        combo.stopAllActions();
+        combo.opacity = 0;
+        combo.scale = 1.5;
+        cc.tween(combo)
+            .to(0.1, {opacity: 255, scale: 1})
+            .delay(0.5)
+            .to(0.1, {opacity: 0})
+            .call(()=>{
+                combo.active = false;
+            })
+            .start();
     }
     
 
@@ -400,9 +429,6 @@ export default class homeUI_ctrl extends BaseView {
     private onUpdateProgress(event, data): void {
         this.fight.updateProgress(data);
     }
-
-    
-   
 
     /**
      * 是否解锁武器
@@ -711,7 +737,7 @@ export default class homeUI_ctrl extends BaseView {
         this.schedule(this._setEnergy, 1, cc.macro.REPEAT_FOREVER, 0);
     }
 
-    private _setEnergy(): void {
+    public _setEnergy(): void {
         const cntNode = this.view("top/energy/count");
         const timeNode = this.view("top/energy/time");
         cntNode.getComponent(cc.Label).string = Energy.instance.currentCnt + "";

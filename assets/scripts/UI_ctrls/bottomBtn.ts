@@ -124,7 +124,7 @@ export default class BottomBtn extends BaseView {
         let iconUrl = "";
         if(data.reward.type == TaskReward.ReceiveSkill){
             iconUrl = `texture/task/reward_${data.reward.value}`;
-            cntLabel = "X 1"
+            cntLabel = "技能(永久使用)"
         }
         else if(data.reward.type == TaskReward.ReceiveCoin){
             iconUrl = "texture/task/reward_coin";
@@ -148,6 +148,76 @@ export default class BottomBtn extends BaseView {
             btnUrl = "texture/task/goBtn";
         }
         UIManager.instance.createTexture(node.getChildByName("btn"), btnUrl);
+        this.onButtonEvent(node.getChildByName("btn"), "onTaskRewardRevClick", data)
+    }
+
+    private onTaskRewardRevClick(event, data): void {
+        SoundManager.instance.playEffect("audioClip/click_s");
+        const uStatus = data.userStatus.rewardStatus;
+        switch (uStatus) {
+            case TaskRewardStatus.unfinished:
+                this.hideTaskList();
+                this.setButtonStatus(this.view("bottom/task"), false);
+                break;
+            case TaskRewardStatus.received:
+                break;
+            default:
+                this.onRevTaskReward(data);
+                break;
+        }
+    }
+
+    private onRevTaskReward(info): void {
+
+        let data = info;
+        
+        GameData.instance.receiveTaskReward(data.taskId);
+        data.userStatus.rewardStatus = TaskRewardStatus.received;
+      
+        const index = parseInt(data.taskId) - 1;
+        const parent = this.view("task/frame/view/content").children[index];
+        const icon = parent.getChildByName("rewardIcon");
+
+        this.setTaskData(parent, data);
+
+        const rewardType = data.reward.type;
+        if(rewardType == TaskReward.ReceiveCoin){
+            SoundManager.instance.playEffect("audioClip/coin");
+            UIManager.instance.playParticle(this.view("top/coin"), "particle/coin");
+            setTimeout(()=>{
+                GameData.instance.receiveTaskCoin(data.reward.value);
+                this.homeUI_ctrl.updateCoin();
+            }, 1000)
+        }
+        else if (rewardType == TaskReward.ReceiveEnergy) {
+            SoundManager.instance.playEffect("audioClip/receiveEnergy");
+            let child = UIManager.instance.nodeClone(this.node, icon);
+            cc.tween(child)
+                .to(0.1, { scale: 1.5 })
+                .delay(0.2)
+                .to(0.7, { scale: 0, position: this.view("top").position })
+                .call(() => {
+                    GameData.instance.receiveEnergy(data.reward.value);
+                    child.destroy();
+                })
+                .start();
+            this.homeUI_ctrl._setEnergy();
+        }
+        else{
+            SoundManager.instance.playEffect("audioClip/receiveEnergy");
+            let child = UIManager.instance.nodeClone(this.node, icon);
+            const wpos = this.view("bottom/skill").convertToWorldSpaceAR(cc.v2(0,0));
+            const pos = this.node.convertToNodeSpaceAR(wpos);
+            cc.tween(child)
+                .to(0.1, { scale: 1.5 })
+                .delay(0.2)
+                .to(0.7, { scale: 0, position: pos})
+                .call(() => {
+                    GameData.instance.unLockSkill(data.reward.value);
+                    child.destroy();
+                })
+                .start();
+        }
     }
 
     /**
@@ -156,6 +226,8 @@ export default class BottomBtn extends BaseView {
     private showWeaponList(): void {
         let weaponList = this.view("weaponList");
         weaponList.active = true;
+        weaponList.opacity = 0;
+        cc.tween(weaponList).to(0.2, {opacity: 255}).start();
         this.createWeaponList();
     }
 
@@ -360,6 +432,8 @@ export default class BottomBtn extends BaseView {
     private showSkillList(): void {
         let skillList = this.view("skillList");
         skillList.active = true;
+        skillList.opacity = 0;
+        cc.tween(skillList).to(0.2, {opacity: 255}).start();
         this.createSkillList();
     }
 

@@ -10,7 +10,7 @@ export enum EventList  {
     resurgence = "resurgence",
     playAdSuccess = "playAdSuccess",
     castSkill = "castSkill",
-
+    combo = "combo",
 }
 
 /**

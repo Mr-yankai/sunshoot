@@ -106,6 +106,8 @@ export const ResList = {
             "texture/freeReceive/videobtn",
 
             "texture/common/life64",
+            "texture/common/combo",
+            "texture/common/miss",
 
             //技能
             "texture/skill/fistUp",
