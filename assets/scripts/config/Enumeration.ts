@@ -58,4 +58,5 @@ export const SkillList = {
     fist : "fist",
     wind : "wind",
     arrowBlizzard : "arrowBlizzard",
+    arrowRound: "arrowRound",
 }

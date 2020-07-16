@@ -8,6 +8,8 @@ export const ResList = {
             "ui_prefabs/sun",
             "ui_prefabs/skillIcon",
             "ui_prefabs/task",
+            "ui_prefabs/skill/wind",
+            "ui_prefabs/skill/fist",
         ],
      
         sprite_frames:[
@@ -115,6 +117,8 @@ export const ResList = {
             "texture/skill/fist",
             "texture/skill/wind",
             "texture/skill/arrowBlizzard",
+            "texture/skill/arrowRound",
+            "texture/skill/round",
 
             //任务
             "texture/task/goBtn",

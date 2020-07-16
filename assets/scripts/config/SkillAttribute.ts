@@ -19,4 +19,9 @@ export const SkillAttribute = {
         damageRate: 0.2,
     },
 
+    arrowRound: {
+        coolDownTime: 3,
+        damageRate: 0.15,
+    }
+
 }

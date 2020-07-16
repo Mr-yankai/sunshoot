@@ -3,7 +3,7 @@ import GameData from '../dataCenter/gameData';
 import UIManager from '../managers/UIManager';
 import EventManager from '../managers/eventManager';
 import SoundManager from "../managers/soundManager"
-import {EventList, ShootStatus, PlayAdReward} from '../config/Enumeration' ;
+import {EventList, ShootStatus, PlayAdReward, SkillList} from '../config/Enumeration' ;
 import {EnergyConfig} from '../config/Global'
 import ResLoad from '../managers/resLoad';
 import {translateNumber, timestampToTime} from '../utills/common';
@@ -14,6 +14,7 @@ import BottomBtn from "./bottomBtn";
 import FreeReceive from "./freeReceive";
 import Fight from "./fight";
 import Settlement from "./settlement";
+import SkillCast from "./skillCast"
 
 const { ccclass, property } = cc._decorator;
 
@@ -36,6 +37,7 @@ export default class homeUI_ctrl extends BaseView {
     private freeReceive: FreeReceive;
     public fight: Fight;
     public settlement: Settlement;
+    public skillCast: SkillCast;
 
     onLoad(): void {
 
@@ -46,6 +48,7 @@ export default class homeUI_ctrl extends BaseView {
         this.freeReceive = this.node.addComponent("freeReceive");
         this.fight = this.node.addComponent("fight");
         this.settlement = this.node.addComponent("settlement");
+        this.skillCast = this.node.addComponent("skillCast");
 
 
         cc.game.on(cc.game.EVENT_SHOW, this.onShareCallback, this);
@@ -107,6 +110,12 @@ export default class homeUI_ctrl extends BaseView {
             EventList.combo,
             this,
             this.showCombo
+        )
+
+        EventManager.instance.add_event_listener(
+            EventList.castSkill,
+            this,
+            this.aroundShoot
         )
     }
 
@@ -177,6 +186,14 @@ export default class homeUI_ctrl extends BaseView {
         this.shareStartTime = 0;
         
     }  
+
+    /**
+     * 监听event: arrowRound技能施放
+     */
+    private aroundShoot(event, data): void {
+        if(data != SkillList.arrowRound) return;
+        this.skillCast.aroundShoot();
+    }
 
     /**
      * 监听event: 产生太阳
@@ -402,8 +419,7 @@ export default class homeUI_ctrl extends BaseView {
 
     /**显示技能施放节点 */
     private showSkill(): void {
-        //this.view("skillRoot").active = true;
-        this.fight.skillInit();
+        this.skillCast.skillInit();
         
     }
 

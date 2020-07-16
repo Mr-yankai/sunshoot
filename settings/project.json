@@ -4,7 +4,8 @@
     "SUN",
     "ARROW",
     "WIND",
-    "ARROWS"
+    "SKILLARROW",
+    "ARROWROUND"
   ],
   "collision-matrix": [
     [
@@ -20,7 +21,10 @@
     [
       false,
       true,
-      false
+      false,
+      null,
+      null,
+      true
     ],
     [
       false,
@@ -29,6 +33,14 @@
       false
     ],
     [
+      false,
+      true,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
       false,
       true,
       false,
@@ -83,6 +95,5 @@
   },
   "migrate-history": [
     "cloud-function"
-  ],
-  "start-scene": "current"
+  ]
 }

@@ -1,9 +1,10 @@
 const {ccclass, property} = cc._decorator;
 import {General} from "../config/Global";
-import {WeaponList} from "../config/Enumeration";
+import {WeaponList, EventList, SkillList} from "../config/Enumeration";
 //import {WeaponAttribute} from "../config/WeaponAttribute"
 import GameData from "../dataCenter/gameData";
 import UIManager from "../managers/UIManager";
+import EventManager from "../managers/eventManager";
 
 @ccclass
 export default class Arrow extends cc.Component {
@@ -36,15 +37,26 @@ export default class Arrow extends cc.Component {
      * @param self 自己节点
      */
     private onCollisionEnter(other, self): void {
-        if(this.hitSunCnt == 0){
-            GameData.instance.updateCombo(true);
+        if(other.node.group == "SUN"){
+            if(this.hitSunCnt == 0){
+                GameData.instance.updateCombo(true);
+            }
+            this.hitSunCnt ++;
+            
+            const weapon = GameData.instance.getCurrentWeapon();
+            if(weapon != WeaponList.PierceArrow){
+                this.node.destroy();
+            } 
         }
-        this.hitSunCnt ++;
-        
-        const weapon = GameData.instance.getCurrentWeapon();
-        if(weapon != WeaponList.PierceArrow){
-            this.node.destroy();
-        }              
+        else if(other.node.group == "ARROWROUND"){
+            EventManager.instance.dispatch_event(EventList.castSkill, SkillList.arrowRound);
+            this.hitSunCnt ++;
+            const weapon = GameData.instance.getCurrentWeapon();
+            if(weapon != WeaponList.PierceArrow){
+                this.node.destroy();
+            } 
+        }
+                     
     }
 
     public getHitCnt(): number {

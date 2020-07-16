@@ -153,8 +153,8 @@ export default class Sun extends cc.Component {
             case "WIND":
                 this.onWindCollision(other, self);
                 break;
-            case "ARROWS":
-                this.onArrowBlizzardCollision(other, self);
+            case "SKILLARROW":
+                this.onSkillArrowCollision(other, self);
                 break;
             default:
                 this.onArrowCollision(other, self);
@@ -183,11 +183,12 @@ export default class Sun extends cc.Component {
     }
 
     /**
-     * 击中对象：乱箭
+     * 击中对象：技能箭--arrowBlizzard or arrowRound
      */
-    private onArrowBlizzardCollision(other, self): void {
+    private onSkillArrowCollision(other, self): void {
         this.oncCollisionDeformation(true, true);
-        const damageRate = GameData.instance.getSkillAttr(SkillList.arrowBlizzard).damageRate;
+        const skill = GameData.instance.getCurrentSkill();
+        const damageRate = GameData.instance.getSkillAttr(skill).damageRate;
         this.blood -= damageRate * this.fullBlood;
         this.updateBlood();
         if (this.blood <= 0) { 
