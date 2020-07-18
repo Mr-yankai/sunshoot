@@ -251,8 +251,11 @@ export default class BottomBtn extends BaseView {
             let item = cc.instantiate(iconPrefab);
             this.view("weaponList/view/content").addChild(item);
             item.name = WeaponList[key];
-            this.createWeaponIcon(item);            
+            this.createWeaponIcon(item);    
+            item.width = cc.winSize.width * 2;
+            cc.tween(item).to(0.5, {width: item.getChildByName("icon").width}, {easing: "quadOut"}).start();
         }
+        
     }
 
     private createWeaponIcon(weaponIcon: cc.Node){       
@@ -282,6 +285,7 @@ export default class BottomBtn extends BaseView {
             this.UpgradeAction(upgrade.getChildByName("upIcon"));
         }
         upgrade.active = false;
+        this.updateWeaponIconStatus(weaponIcon, uData.lastWeapon == weapon)
         
         //等级显示
         const level = weaponIcon.getChildByName("icon").getChildByName("level");
@@ -327,6 +331,11 @@ export default class BottomBtn extends BaseView {
         const resUrl = isClick ? `texture/weaponIcon/${weapon}_1` : `texture/weaponIcon/${weapon}_0`;
         UIManager.instance.createTexture(weaponNode.getChildByName("icon"), resUrl);
         weaponNode.getChildByName("upgrade").active = isClick && !isMax;
+
+        if(isClick){
+            weaponNode.getChildByName("upgrade").opacity = 0;
+            cc.tween(weaponNode.getChildByName("upgrade")).to(0.2, {opacity: 255}).start();
+        }
     }
 
     /**
@@ -374,25 +383,21 @@ export default class BottomBtn extends BaseView {
                 GameData.instance.setVideoOrShareTime("video", nowTime);
             }            
         }
-        else{
-            this.onWeaponIconClickCallback();
-        }       
+        else {
+            this.homeUI_ctrl.weapon = this.homeUI_ctrl.weaponClick;
+            GameData.instance.updateLastWeapon(this.homeUI_ctrl.weapon);   //主武器切换
+            this.homeUI_ctrl.fight.updateWeaponStatus(this.homeUI_ctrl.weapon, ShootStatus.Ready)
+            const icons = this.view("weaponList/view/content").children;
+            //icon点击状态切换
+            icons.forEach(element => {
+                this.updateWeaponIconStatus(element, element.name == this.homeUI_ctrl.weapon);
+            })
+        }
     }
 
     /**
-     * 武器icon点击成功事件
+     * 升级按钮点击事件
      */
-    public onWeaponIconClickCallback(): void {
-        this.homeUI_ctrl.weapon = this.homeUI_ctrl.weaponClick;
-        GameData.instance.updateLastWeapon(this.homeUI_ctrl.weapon);   //主武器切换
-        this.homeUI_ctrl.fight.updateWeaponStatus(this.homeUI_ctrl.weapon, ShootStatus.Ready)
-        const icons = this.view("weaponList/view/content").children;
-        //icon点击状态切换
-        icons.forEach(element => {
-            this.updateWeaponIconStatus(element, element.name == this.homeUI_ctrl.weapon);
-        })
-    }
-
     private onUpgradeClick(event, data): void {
         const weapon = data.weapon;
         const isOk = GameData.instance.weaponUpgrade(weapon);
@@ -453,12 +458,16 @@ export default class BottomBtn extends BaseView {
     private createSkillList(): void {
         this.view("skillList/view/content").removeAllChildren();
         const iconPrefab = ResLoad.instance.getRes("ui_prefabs/skillIcon");
+        const content = this.view("skillList/view/content");
         for(let key in SkillList){
             let item = cc.instantiate(iconPrefab);
-            this.view("skillList/view/content").addChild(item);
+            content.addChild(item);
             item.name = SkillList[key];
-            this.createSkillIcon(item);            
+            this.createSkillIcon(item);
+            item.width = cc.winSize.width * 2;
+            cc.tween(item).to(0.5, {width: item.getChildByName("bg").width}, {easing: "quadOut"}).start();      
         }
+        
     }
 
     /**绘制技能图标 */
@@ -468,6 +477,10 @@ export default class BottomBtn extends BaseView {
 
         const iconUrl = `texture/skill/${skill}`;
         UIManager.instance.createTexture(skillIcon.getChildByName("skill"), iconUrl)
+
+        const isClick = skill == uData.lastSkill;
+        const bgUrl = isClick ? "texture/skill/select" : "texture/skill/unSelect";
+        UIManager.instance.createTexture(skillIcon.getChildByName("bg"), bgUrl);
         
         const whetherHave = uData.skill[`${skill}`];
         skillIcon.getChildByName("lock").active = !whetherHave;

@@ -156,6 +156,9 @@ export default class Sun extends cc.Component {
             case "SKILLARROW":
                 this.onSkillArrowCollision(other, self);
                 break;
+            case "FIREWORK":
+                this.onFireworkCollision(other, self);
+                break;
             default:
                 this.onArrowCollision(other, self);
                 break;
@@ -195,6 +198,14 @@ export default class Sun extends cc.Component {
             this.explode();
             this.node.destroy();
         }
+    }
+
+    /**
+     * 击中对象：防火墙
+     */
+    private onFireworkCollision(other, self): void {
+        const upDistance = Math.random() * 40 + 40;
+        cc.tween(this.node).by(0.5, {y: upDistance}).start();
     }
 
     /**

@@ -119,6 +119,7 @@ export const ResList = {
             "texture/skill/arrowBlizzard",
             "texture/skill/arrowRound",
             "texture/skill/round",
+            "texture/skill/firework",
 
             //任务
             "texture/task/goBtn",
@@ -154,6 +155,7 @@ export const ResList = {
             "particle/juqi",
             "particle/upgrade",
             "particle/coin",
+            "particle/firework"
             // "particle/maulerWava",
             
             

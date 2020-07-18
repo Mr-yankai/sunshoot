@@ -5,7 +5,8 @@
     "ARROW",
     "WIND",
     "SKILLARROW",
-    "ARROWROUND"
+    "ARROWROUND",
+    "FIREWORK"
   ],
   "collision-matrix": [
     [
@@ -16,6 +17,8 @@
       false,
       true,
       true,
+      true,
+      null,
       true
     ],
     [
@@ -43,6 +46,15 @@
       false,
       false,
       true,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      true,
+      false,
+      false,
       false,
       false,
       false

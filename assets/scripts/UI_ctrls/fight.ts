@@ -352,6 +352,25 @@ export default class Fight extends BaseView {
     public resetFocoRate(): void {
         this.focoRate = 0;
         this.updateFocoRate();
+        this.disActiveSkillEffect();
+    }
+
+    /**激活技能按钮特效 */
+    private activeSkillEffect(): void {
+        const effect = this.view("skillRoot/switch/effect");
+        effect.active = true;
+        const particle = effect.getComponent(cc.ParticleSystem);
+        particle.resetSystem();
+
+        cc.tween(effect)
+            .repeatForever(
+                cc.tween().by(3, {angle: -360})
+            )
+            .start();
+    }
+
+    private disActiveSkillEffect(): void {
+        this.view("skillRoot/switch/effect").active = false;
     }
 
     update(dt): void {
@@ -362,6 +381,9 @@ export default class Fight extends BaseView {
         this.focoRate += dt / coolTime;
         if(this.focoRate > 1){
             this.focoRate = 1;
+            if(!this.view("skillRoot/switch/effect").active){
+                this.activeSkillEffect();
+            }
         }
         this.updateFocoRate();
         

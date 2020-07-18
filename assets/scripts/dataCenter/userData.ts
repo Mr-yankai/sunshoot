@@ -21,7 +21,7 @@ export default class UserData {
         totalCoin: 0, //累计获取的金币数
         coin: 0,  //当前金币数
         lastWeapon: WeaponList.GeneralArrow, //最后选择的武器
-        lastSkill: SkillList.fist, //最后选择的技能
+        lastSkill: SkillList.arrowBlizzard, //最后选择的技能
         weapon: {
             generalArrow: {
                 whetherHave: true,
@@ -48,7 +48,7 @@ export default class UserData {
                 level: 1
             },
         },
-        skill: {},
+        skill: {arrowBlizzard: true},
         task: {}
     }
 
@@ -85,7 +85,8 @@ export default class UserData {
             for(let skillKey in SkillList){
                 if(uData["skill"][SkillList[skillKey]] == undefined){
                     uData["skill"][SkillList[skillKey]] = false;
-                }                    
+                }
+                uData["skill"]["arrowBlizzard"] = true;
             }
 
             if(uData["task"] == undefined){
@@ -225,9 +226,7 @@ export default class UserData {
     }
 
     public weaponUpgrade(weapon: string): void {
-        console.log("b:",this.uData.weapon[weapon].level)
         this.uData.weapon[weapon].level ++;
-        console.log("a:",this.uData.weapon[weapon].level)
         this.uDataLocalStorage();
     }
 

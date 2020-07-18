@@ -53,6 +53,9 @@ export default class SkillCast extends BaseView {
             case SkillList.arrowRound:
                 this.playArrowRoundSkill();
                 break;
+            case SkillList.firework:
+                this.playFireworkSkill();
+                break;
             default:
                 break;
         }
@@ -211,27 +214,77 @@ export default class SkillCast extends BaseView {
      */
     private playArrowRoundSkill(): void {
         const skillNode = this.view("skillRoot/skill");
-        const arrowRound = new cc.Node;
-        arrowRound.name = "arrowRound";
-        arrowRound.group = "ARROWROUND";
-        arrowRound.opacity = 0;
-        arrowRound.scale = 6;
-        UIManager.instance.createTexture(arrowRound, "texture/skill/round");
-        skillNode.addChild(arrowRound);
-        let ccl = arrowRound.addComponent(cc.CircleCollider);
-        ccl.radius = arrowRound.width * 0.5;
+        const skillCenter = new cc.Node;
+        skillCenter.name = "skillCenter";
+        skillCenter.group = "ARROWROUND";
+        UIManager.instance.createTexture(skillCenter, "texture/skill/round");
+        skillNode.addChild(skillCenter);
+        
+        this.arrowCenterAppear(skillCenter, true);
 
-        cc.tween(arrowRound)
-            .to(0.2, {scale: 1, opacity: 255})
-            .by(3, {angle: 90})
-            .call(()=>{
-                arrowRound.destroy();
-            })
-            .start();       
+        setTimeout(()=>{
+            skillCenter.destroy();
+        }, 8000)
+    }
+
+    private arrowCenterAppear(skillCenter: cc.Node, isFirst: boolean): void {
+        //首次出现：直接出现
+        if(isFirst){
+            skillCenter.opacity = 0;
+            skillCenter.scale = 6;
+            skillCenter.setPosition(
+                (Math.random() - 0.5) * skillCenter.parent.width * 0.8, 
+                (Math.random() - 0.5) * skillCenter.parent.height * 0.6
+            );
+            cc.tween(skillCenter)
+                .to(0.3, { scale: 1, opacity: 255 }) 
+                .call(()=>{
+                    let ccl = skillCenter.addComponent(cc.CircleCollider);
+                    ccl.radius = skillCenter.width * 0.5;
+                })
+                .repeatForever(
+                    cc.tween()
+                        .delay(1)
+                        .to(0.2, {scale: 1.2})
+                        .to(0.2, {scale: 1})
+                        .to(0.2, {scale: 1.2})
+                        .to(0.2, {scale: 1})
+                )
+                .start();
+        }       
+        //非首次出现: 先消失，后出现
+        else{
+            skillCenter.stopAllActions();
+            cc.tween(skillCenter)
+                .to(0.3, {opacity: 0, scale: 0}, {easing: "backIn"}) //消失
+                .call(()=>{
+                    skillCenter.setPosition(
+                        (Math.random() - 0.5) * skillCenter.parent.width * 0.8, 
+                        (Math.random() - 0.5) * skillCenter.parent.height * 0.6
+                    );
+                    skillCenter.scale = 6;
+                })
+                .to(0.3, { scale: 1, opacity: 255 }) //出现
+                .call(()=>{
+                    let ccl = skillCenter.addComponent(cc.CircleCollider);
+                    ccl.radius = skillCenter.width * 0.5;
+                })
+                .repeatForever(
+                    cc.tween()
+                        .delay(1)
+                        .to(0.2, {scale: 1.2})
+                        .to(0.2, {scale: 1})
+                        .to(0.2, {scale: 1.2})
+                        .to(0.2, {scale: 1})
+                )
+                .start();
+        }      
     }
 
     public aroundShoot(): void {
-        const skillRount = this.view("skillRoot/skill/arrowRound");
+        const skillCenter = this.view("skillRoot/skill/skillCenter");
+        skillCenter.removeComponent(cc.CircleCollider);
+
         const weapon = GameData.instance.getCurrentWeapon();
         const arrowUrl = `texture/weapon/${weapon}_arrow`;
 
@@ -241,11 +294,11 @@ export default class SkillCast extends BaseView {
             const arrow = new cc.Node();  
             arrow.group = "SKILLARROW";
             arrow.addComponent(cc.BoxCollider);
-            skillRount.addChild(arrow);     
+            skillCenter.addChild(arrow);     
             UIManager.instance.createTexture(arrow, arrowUrl);
             UIManager.instance.setShaderEffect(arrow, "Glowing");
             arrow.setAnchorPoint(0.5, 0);
-            arrow.setPosition(skillRount.width * 0.5 * Math.cos(i), skillRount.width * 0.5 * Math.sin(i));
+            arrow.setPosition(skillCenter.width * 0.5 * Math.cos(i), skillCenter.width * 0.5 * Math.sin(i));
             arrow.angle = 180 * i / Math.PI - 90;
             arrow.scale = 0.5
 
@@ -255,8 +308,32 @@ export default class SkillCast extends BaseView {
                     arrow.destroy();
                 })
                 .start();
-
         }
+        setTimeout(()=>{
+            skillCenter && this.arrowCenterAppear(skillCenter, false); 
+        }, 400)
+    }
+
+    /**
+     * 施放技能：firework
+     */
+    private playFireworkSkill(): void {
+        const skillNode = this.view("skillRoot/skill");
+        let firework = new cc.Node();
+        skillNode.addChild(firework);
+        firework.setAnchorPoint(0.5, 0);
+        firework.setPosition(0, - skillNode.height / 2);
+        const bcl = firework.addComponent(cc.BoxCollider);
+        bcl.size = new cc.Size(cc.winSize.width / 2, 60);
+        firework.group = "FIREWORK";
+        const particle = firework.addComponent(cc.ParticleSystem);
+        particle.file = ResLoad.instance.getRes("particle/firework", cc.ParticleAsset);
+        particle.posVar = cc.v2(cc.winSize.width / 2, 6);
+        particle.resetSystem();
+
+        setTimeout(()=>{
+            firework.destroy();
+        }, 6000)
     }
     
 }
