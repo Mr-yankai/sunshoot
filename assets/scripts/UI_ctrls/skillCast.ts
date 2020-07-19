@@ -236,6 +236,8 @@ export default class SkillCast extends BaseView {
                 (Math.random() - 0.5) * skillCenter.parent.width * 0.8, 
                 (Math.random() - 0.5) * skillCenter.parent.height * 0.6
             );
+            
+            SoundManager.instance.playEffect("audioClip/arrowRound");
             cc.tween(skillCenter)
                 .to(0.3, { scale: 1, opacity: 255 }) 
                 .call(()=>{
@@ -262,7 +264,8 @@ export default class SkillCast extends BaseView {
                         (Math.random() - 0.5) * skillCenter.parent.width * 0.8, 
                         (Math.random() - 0.5) * skillCenter.parent.height * 0.6
                     );
-                    skillCenter.scale = 6;
+                    skillCenter.scale = 6;                   
+                    SoundManager.instance.playEffect("audioClip/arrowRound");
                 })
                 .to(0.3, { scale: 1, opacity: 255 }) //出现
                 .call(()=>{

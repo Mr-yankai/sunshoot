@@ -125,11 +125,13 @@ export const ResList = {
             "texture/task/goBtn",
             "texture/task/receiveBtn",
             "texture/task/receivedBtn",
-            "texture/task/reward_arrowBlizzard",
             "texture/task/reward_coin",
             "texture/task/reward_energy",
+            "texture/task/reward_arrowBlizzard",
             "texture/task/reward_fist",
+            "texture/task/reward_arrowRound",
             "texture/task/reward_wind",
+            "texture/task/reward_firework",
         ],
         
         audio_clips: [
@@ -145,6 +147,7 @@ export const ResList = {
             "audioClip/receiveEnergy",
             "audioClip/success",
             "audioClip/fail",
+            "audioClip/arrowRound",
         ],
         
         sprite_atlases: [],

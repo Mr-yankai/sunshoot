@@ -6,7 +6,7 @@ import GameData from '../dataCenter/gameData';
 import Advert from "../wx/advert";
 import {translateNumber, timestampToTime} from '../utills/common';
 import {EventList, WeaponList, ShootStatus, PlayAdReward, SkillList} from '../config/Enumeration';
-import {TaskReward, TaskRewardStatus} from "../config/Task"
+import {TaskReward, TaskRewardStatus, TaskType} from "../config/Task"
 import EventManager from '../managers/eventManager';
 import homeUI_ctrl from "./homeUI_ctrl";
 
@@ -64,6 +64,7 @@ export default class BottomBtn extends BaseView {
     }
 
     private onTaskMaskClick(): void {
+        SoundManager.instance.playEffect("audioClip/click_s");
         this.hideTaskList();
         this.setButtonStatus(this.view("bottom/task"), false);
     }
@@ -91,7 +92,7 @@ export default class BottomBtn extends BaseView {
      * 隐藏任务列表
      */
     private hideTaskList(): void {
-        SoundManager.instance.playEffect("audioClip/click_s");
+        //SoundManager.instance.playEffect("audioClip/click_s");
         let task = this.view("task");
         task.active = false;
     }
@@ -118,24 +119,28 @@ export default class BottomBtn extends BaseView {
      */
     private setTaskData(node: cc.Node, data: any): void {
         node.getChildByName("title").getComponent(cc.Label).string = data.title;
-        node.getChildByName("description").getComponent(cc.Label).string = data.description;
-        node.getChildByName("progress").getComponent(cc.Label).string = `${data.userStatus.userCnt} / ${data.condition.value}`;
+        node.getChildByName("description").getComponent(cc.Label).string = data.description;    
+        let progressStr = `${data.userStatus.userCnt} / ${data.condition.value}`;
         let cntLabel = "";
         let iconUrl = "";
         if(data.reward.type == TaskReward.ReceiveSkill){
             iconUrl = `texture/task/reward_${data.reward.value}`;
-            cntLabel = "技能(永久使用)"
+            cntLabel = "技能(永久使用)";
         }
         else if(data.reward.type == TaskReward.ReceiveCoin){
             iconUrl = "texture/task/reward_coin";
-            cntLabel = `X ${data.reward.value}`
+            cntLabel = `X ${translateNumber(data.reward.value)}`;
         }
         else if(data.reward.type == TaskReward.ReceiveEnergy){
             iconUrl = "texture/task/reward_energy";
-            cntLabel = `X ${data.reward.value}`
+            cntLabel = `X ${data.reward.value}`;
+        }
+        if(data.condition.type == TaskType.TotalCoin){
+            progressStr = `${translateNumber(data.userStatus.userCnt)} / ${translateNumber(data.condition.value)}`;
         }
         node.getChildByName("rewardCnt").getComponent(cc.Label).string = cntLabel;
         UIManager.instance.createTexture(node.getChildByName("rewardIcon"), iconUrl);
+        node.getChildByName("progress").getComponent(cc.Label).string = progressStr;
 
         let btnUrl = "";
         if(data.userStatus.rewardStatus == TaskRewardStatus.received){
@@ -185,7 +190,7 @@ export default class BottomBtn extends BaseView {
             SoundManager.instance.playEffect("audioClip/coin");
             UIManager.instance.playParticle(this.view("top/coin"), "particle/coin");
             setTimeout(()=>{
-                GameData.instance.receiveTaskCoin(data.reward.value);
+                GameData.instance.receiveTaskCoin(parseInt(data.reward.value) );
                 this.homeUI_ctrl.updateCoin();
             }, 1000)
         }
@@ -197,7 +202,7 @@ export default class BottomBtn extends BaseView {
                 .delay(0.2)
                 .to(0.7, { scale: 0, position: this.view("top").position })
                 .call(() => {
-                    GameData.instance.receiveEnergy(data.reward.value);
+                    GameData.instance.receiveEnergy(parseInt(data.reward.value));
                     child.destroy();
                 })
                 .start();
@@ -226,8 +231,6 @@ export default class BottomBtn extends BaseView {
     private showWeaponList(): void {
         let weaponList = this.view("weaponList");
         weaponList.active = true;
-        weaponList.opacity = 0;
-        cc.tween(weaponList).to(0.2, {opacity: 255}).start();
         this.createWeaponList();
     }
 
@@ -236,7 +239,7 @@ export default class BottomBtn extends BaseView {
      */
     public hideWeaponList(): void {
         if(!this.view("weaponList").active) return;
-        SoundManager.instance.playEffect("audioClip/click_s");
+        //SoundManager.instance.playEffect("audioClip/click_s");
         let weaponList = this.view("weaponList");
         weaponList.active = false;
     }
@@ -384,15 +387,19 @@ export default class BottomBtn extends BaseView {
             }            
         }
         else {
-            this.homeUI_ctrl.weapon = this.homeUI_ctrl.weaponClick;
-            GameData.instance.updateLastWeapon(this.homeUI_ctrl.weapon);   //主武器切换
-            this.homeUI_ctrl.fight.updateWeaponStatus(this.homeUI_ctrl.weapon, ShootStatus.Ready)
-            const icons = this.view("weaponList/view/content").children;
-            //icon点击状态切换
-            icons.forEach(element => {
-                this.updateWeaponIconStatus(element, element.name == this.homeUI_ctrl.weapon);
-            })
+            this.onWeaponIconClickCallback();
         }
+    }
+
+    public onWeaponIconClickCallback(): void {
+        this.homeUI_ctrl.weapon = this.homeUI_ctrl.weaponClick;
+        GameData.instance.updateLastWeapon(this.homeUI_ctrl.weapon);   //主武器切换
+        this.homeUI_ctrl.fight.updateWeaponStatus(this.homeUI_ctrl.weapon, ShootStatus.Ready)
+        const icons = this.view("weaponList/view/content").children;
+        //icon点击状态切换
+        icons.forEach(element => {
+            this.updateWeaponIconStatus(element, element.name == this.homeUI_ctrl.weapon);
+        })
     }
 
     /**
@@ -437,8 +444,6 @@ export default class BottomBtn extends BaseView {
     private showSkillList(): void {
         let skillList = this.view("skillList");
         skillList.active = true;
-        skillList.opacity = 0;
-        cc.tween(skillList).to(0.2, {opacity: 255}).start();
         this.createSkillList();
     }
 
@@ -447,7 +452,7 @@ export default class BottomBtn extends BaseView {
      */
     public hideSkillList(): void {
         if(!this.view("skillList").active) return;
-        SoundManager.instance.playEffect("audioClip/click_s");
+        //SoundManager.instance.playEffect("audioClip/click_s");
         let skillList = this.view("skillList");
         skillList.active = false;
     }

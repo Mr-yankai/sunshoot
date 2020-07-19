@@ -124,7 +124,6 @@ export default class GameData  {
             cfg[key]["userStatus"] = userStatus;
             cfg[key]["taskId"] = key;
         }
-        console.log(cfg)
         return cfg;
     }
 

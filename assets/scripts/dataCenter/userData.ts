@@ -188,7 +188,6 @@ export default class UserData {
      * @param offset 增量
      */
     public updateCoin(offset: number): void {
-        
         this.uData.coin += offset;
 
         if(offset > 0){

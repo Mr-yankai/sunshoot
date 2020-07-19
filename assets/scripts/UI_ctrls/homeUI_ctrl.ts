@@ -283,7 +283,8 @@ export default class homeUI_ctrl extends BaseView {
     /**
      * 空白区域点击事件
      */
-    private onBlankClick(): void {
+    private onBlankClick(): void {      
+        SoundManager.instance.playEffect("audioClip/click_s");
         const hideTime = new Date().getTime();
         const timeOffset = hideTime - this.openTime;
         if(timeOffset < 1000) return;
