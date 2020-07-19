@@ -118,27 +118,72 @@ export default class BottomBtn extends BaseView {
      * @param data 
      */
     private setTaskData(node: cc.Node, data: any): void {
-        node.getChildByName("title").getComponent(cc.Label).string = data.title;
-        node.getChildByName("description").getComponent(cc.Label).string = data.description;    
+        // node.getChildByName("title").getComponent(cc.Label).string = data.title;
+        // node.getChildByName("description").getComponent(cc.Label).string = data.description;    
+        // let progressStr = `${data.userStatus.userCnt} / ${data.condition.value}`;
+        // let cntLabel = "";
+        // let iconUrl = "";
+        // if(data.reward.type == TaskReward.ReceiveSkill){
+        //     iconUrl = `texture/task/reward_${data.reward.value}`;
+        //     cntLabel = "技能(永久使用)";
+        // }
+        // else if(data.reward.type == TaskReward.ReceiveCoin){
+        //     iconUrl = "texture/task/reward_coin";
+        //     cntLabel = `X ${translateNumber(data.reward.value)}`;
+        // }
+        // else if(data.reward.type == TaskReward.ReceiveEnergy){
+        //     iconUrl = "texture/task/reward_energy";
+        //     cntLabel = `X ${data.reward.value}`;
+        // }
+        // if(data.condition.type == TaskType.TotalCoin){
+        //     progressStr = `${translateNumber(data.userStatus.userCnt)} / ${translateNumber(data.condition.value)}`;
+        // }
+        // node.getChildByName("rewardCnt").getComponent(cc.Label).string = cntLabel;
+        // UIManager.instance.createTexture(node.getChildByName("rewardIcon"), iconUrl);
+        // node.getChildByName("progress").getComponent(cc.Label).string = progressStr;
+
+        // let btnUrl = "";
+        // if(data.userStatus.rewardStatus == TaskRewardStatus.received){
+        //     btnUrl = "texture/task/receivedBtn";
+        // }
+        // else if(data.userStatus.rewardStatus == TaskRewardStatus.unreceived){
+        //     btnUrl = "texture/task/receiveBtn";
+        // }
+        // else{
+        //     btnUrl = "texture/task/goBtn";
+        // }
+        // UIManager.instance.createTexture(node.getChildByName("btn"), btnUrl);
+        // this.onButtonEvent(node.getChildByName("btn"), "onTaskRewardRevClick", data)
+
+        UIManager.instance.createTexture(node.getChildByName("title"), `texture/task/${data.taskId}_title`);
+        UIManager.instance.createTexture(node.getChildByName("description"), `texture/task/${data.taskId}_description`);
+    
         let progressStr = `${data.userStatus.userCnt} / ${data.condition.value}`;
-        let cntLabel = "";
+        
         let iconUrl = "";
         if(data.reward.type == TaskReward.ReceiveSkill){
             iconUrl = `texture/task/reward_${data.reward.value}`;
-            cntLabel = "技能(永久使用)";
+            node.getChildByName("rewardCnt").removeComponent(cc.Label);
+            UIManager.instance.createTexture(node.getChildByName("rewardCnt"), "texture/task/rewardCnt_skill");
         }
         else if(data.reward.type == TaskReward.ReceiveCoin){
             iconUrl = "texture/task/reward_coin";
-            cntLabel = `X ${translateNumber(data.reward.value)}`;
+            let label = node.getChildByName("rewardCnt").getComponent(cc.Label);
+            node.getChildByName("rewardCnt").color = cc.Color.RED;
+            //label.fontSize = 22;
+            label.string = `X ${translateNumber(data.reward.value)}`;
         }
         else if(data.reward.type == TaskReward.ReceiveEnergy){
             iconUrl = "texture/task/reward_energy";
-            cntLabel = `X ${data.reward.value}`;
+            let label = node.getChildByName("rewardCnt").getComponent(cc.Label);
+            node.getChildByName("rewardCnt").color = cc.Color.RED;
+            //label.fontSize = 22;
+            label.string = `X ${data.reward.value}`;
         }
         if(data.condition.type == TaskType.TotalCoin){
             progressStr = `${translateNumber(data.userStatus.userCnt)} / ${translateNumber(data.condition.value)}`;
         }
-        node.getChildByName("rewardCnt").getComponent(cc.Label).string = cntLabel;
+        
         UIManager.instance.createTexture(node.getChildByName("rewardIcon"), iconUrl);
         node.getChildByName("progress").getComponent(cc.Label).string = progressStr;
 
